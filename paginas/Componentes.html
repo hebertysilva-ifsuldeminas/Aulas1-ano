@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Componentes Bootstrap - Aula Completa</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* CORREÇÃO: Impede o transbordamento horizontal */
+        }
+        
+        .slide {
+            display: none;
+            height: 100vh;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 3rem 4rem;
+            /* NOVO DEGRADE MAIS VIBRANTE */
+            background: linear-gradient(135deg, rgba(118, 70, 191, 0.2) 0%, rgba(121, 82, 179, 0) 60%), #ffffff;
+            
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        
+        .slide.active {
+            display: flex;
+        }
+
+        .slide-header {
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .slide-body {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #343a40;
+        }
+        
+        .component-demo {
+            background-color: #ffffff;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            font-size: 2em;
+        }
+        
+        .component-demo:hover {
+            border-color: #6f42c1;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .concept-box, .info-card {
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        .info-card{
+            font-size:1.5em;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+
+        .concept-box {
+            border-top: 5px solid #6f42c1;
+        }
+        
+        /*.slide-counter, .nav-button, .progress-bar-container {
+            position: fixed;
+            z-index: 1050; /* Z-index alto para garantir que fiquem no topo 
+        }*/
+
+        .slide-counter {
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar-container {
+            top: 0; left: 0;
+            height: 4px; width: 100%;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #3b82f6);
+            transition: width 0.3s ease;
+        }
+        
+        .modal-body pre {
+            border-radius: 0.5rem;
+        }
+
+        .concept-text {
+            font-size: 1.7rem;
+            line-height: 1.6;
+        }
+        .concept-text code {
+            font-size: 1.5rem;
+            padding: 0.3em 0.6em !important;
+        }
+
+        /* NOVAS ANIMAÇÕES */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animatable {
+            /* Estado inicial da animação */
+            opacity: 0;
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="slide-counter"><i class="bi bi-display me-2"></i><span id="currentSlide">1</span> / <span id="totalSlides"></span></div>
+    <div class="position-fixed top-50 start-0 translate-middle-y z-3 ms-4"><button onclick="previousSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-left fs-5 lh-1"></i></button></div>
+    <div class="position-fixed top-50 end-0 translate-middle-y z-3 me-4"><button onclick="nextSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-right fs-5 lh-1"></i></button></div>
+
+    <div class="slide active justify-content-center">
+        <div class="slide-content text-center">
+            <div class="mb-4" style="animation: float 3s ease-in-out infinite;">
+                <i class="bi bi-bootstrap-fill" style="font-size: 8rem; color: #7952b3; text-shadow: 0 0 30px rgba(121, 82, 179, 0.5);"></i>
+            </div>
+            <h1 class="mb-3 display-1 fw-bolder animatable fade-in-up" style="color: #563d7c; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Componentes Bootstrap</h1>
+            <p class="mb-4 display-5 fw-light animatable fade-in-up delay-1" style="color: #6f42c1;">Botões, Imagens e Cards</p>
+            <div class="fs-4 text-secondary animatable fade-in-up delay-2">
+                <p><i class="bi bi-code-slash me-2" style="color: #7952b3;"></i>Exemplos Práticos e Interativos</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">O que vamos aprender?</h2></div>
+            <div class="slide-body">
+                <div class="row g-4 justify-content-center w-100">
+                    <div class="col-md-4 col-lg-3 animatable delay-1">
+                        <div class="card h-100 shadow-sm border-0 rounded-4 p-4 text-center info-card">
+                            <div class="display-3 text-primary mb-4"><i class="bi bi-hand-index-thumb"></i></div>
+                            <h3 class="fw-bold mb-3 text-dark">Botões</h3>
+                            <p class="text-muted">Ações interativas essenciais, suas variações e boas práticas.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-3 animatable delay-2">
+                        <div class="card h-100 shadow-sm border-0 rounded-4 p-4 text-center info-card">
+                            <div class="display-3 text-success mb-4"><i class="bi bi-image-alt"></i></div>
+                            <h3 class="fw-bold mb-3 text-dark">Imagens</h3>
+                            <p class="text-muted">Como torná-las responsivas e alinhá-las corretamente.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-3 animatable delay-3">
+                        <div class="card h-100 shadow-sm border-0 rounded-4 p-4 text-center info-card">
+                            <div class="display-3 text-info mb-4"><i class="bi bi-card-heading"></i></div>
+                            <h3 class="fw-bold mb-3 text-dark">Cards</h3>
+                            <p class="text-muted">O componente mais versátil para agrupar conteúdo.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-hand-index-thumb me-3"></i>O que são Botões?</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">São o principal meio de interação do usuário, indicando uma ação.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-code-braces me-2"></i>Classes Fundamentais</h4>
+                        <p class="concept-text">Classe base: <code class="bg-light p-2 rounded">.btn</code> (Obrigatória para aplicar estilos Bootstrap).</p>
+                        <p class="concept-text mt-3">Classe de estilo: <code class="bg-light p-2 rounded">.btn-*</code> (Define a cor e o significado, ex: <code>.btn-primary</code>).</p>
+                        <hr class="my-5">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-tags me-2"></i>Uso Semântico</h4>
+                        <p class="concept-text">Podem ser aplicados em tags <code class="bg-light p-2 rounded">&lt;button&gt;</code>, <code class="bg-light p-2 rounded">&lt;a&gt;</code> (links) e <code class="bg-light p-2 rounded">&lt;input&gt;</code> (campos de formulário).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Exemplo: Estilos de Botões</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row gy-5">
+                        <div class="col-lg-6 animatable delay-1">
+                            <h3 class="fw-semibold mb-4 text-dark">Botões Sólidos</h3>
+                            <div class="p-4 rounded-4 component-demo" data-bs-toggle="modal" data-bs-target="#modal-btn-solid">
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                    <button class="btn btn-primary">Primary</button>
+                                    <button class="btn btn-secondary">Secondary</button>
+                                    <button class="btn btn-success">Success</button>
+                                    <button class="btn btn-danger">Danger</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 animatable delay-2">
+                            <h3 class="fw-semibold mb-4 text-dark">Botões Outline</h3>
+                            <div class="p-4 rounded-4 component-demo" data-bs-toggle="modal" data-bs-target="#modal-btn-outline">
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                    <button class="btn btn-outline-primary">Primary</button>
+                                    <button class="btn btn-outline-secondary">Secondary</button>
+                                    <button class="btn btn-outline-success">Success</button>
+                                    <button class="btn btn-outline-danger">Danger</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Boas Práticas com Botões</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-palette fs-1 text-primary"></i>
+                                <h4 class="fw-bold my-3">Consistência</h4>
+                                <p class="text-muted">Use as cores de forma consistente. Ação primária sempre com a mesma cor, ações de exclusão sempre em vermelho, etc.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-fonts fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">Clareza</h4>
+                                <p class="text-muted">Use textos claros e que indiquem a ação. "Salvar Alterações" é melhor que "Enviar".</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-universal-access fs-1 text-info"></i>
+                                <h4 class="fw-bold my-3">Acessibilidade</h4>
+                                <p class="text-muted">Para botões com apenas ícones, use a classe <code>.visually-hidden</code> para adicionar um texto descritivo para leitores de tela.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Exemplo: Botões Avançados</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row gy-5">
+                        <div class="col-lg-6 animatable delay-1">
+                            <h3 class="fw-semibold mb-4 text-dark">Com Ícones</h3>
+                            <div class="p-4 rounded-4 component-demo d-flex flex-wrap justify-content-center gap-3" data-bs-toggle="modal" data-bs-target="#modal-btn-icons">
+                                <button type="button" class="btn btn-success"><i class="bi bi-check-circle me-2"></i> Salvar</button>
+                                <button type="button" class="btn btn-danger"><i class="bi bi-trash me-2"></i> Excluir</button>
+                                <button type="button" class="btn btn-warning"><i class="bi bi-pencil-square me-2"></i> Editar</button>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 animatable delay-2">
+                            <h3 class="fw-semibold mb-4 text-dark">Largura Total (Block)</h3>
+                            <div class="p-4 rounded-4 component-demo" data-bs-toggle="modal" data-bs-target="#modal-btn-block">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" type="button">Entrar</button>
+                                    <button class="btn btn-outline-secondary" type="button">Criar Conta</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-image-alt me-3"></i>Imagens Responsivas</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">O desafio de fazer imagens se adaptarem a qualquer tela.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box" style="border-color: #28a745;">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-fullscreen me-2"></i>O Problema</h4>
+                        <p class="concept-text">Imagens com largura fixa (ex: <code class="bg-white p-2 rounded">width="800px"</code>) "quebram" o layout em telas menores, criando barras de rolagem indesejadas.</p>
+                        <hr class="my-5">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-magic me-2"></i>A Solução Bootstrap</h4>
+                        <p class="concept-text">Use a classe <code class="bg-white p-2 rounded">.img-fluid</code>.</p>
+                        <p class="concept-text mt-3">Ela aplica <code class="bg-white p-2 rounded">max-width: 100%;</code> e <code class="bg-white p-2 rounded">height: auto;</code>, garantindo que a imagem nunca ultrapasse o contêiner pai, adaptando-se perfeitamente.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Exemplo: Imagem Fluida e Thumbnail</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row gy-5 align-items-center">
+                        <div class="col-lg-8 animatable delay-1">
+                            <h3 class="fw-semibold mb-4 text-dark">Imagem Fluida</h3>
+                            <div class="p-4 rounded-4 component-demo" data-bs-toggle="modal" data-bs-target="#modal-img-fluid">
+                                <img src="https://placehold.co/800x200/28a745/ffffff?text=Esta+imagem+é+fluida+(.img-fluid)" class="img-fluid rounded" alt="Imagem Fluida">
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <h3 class="fw-semibold mb-4 text-dark">Thumbnail</h3>
+                            <div class="p-4 rounded-4 component-demo d-inline-block" data-bs-toggle="modal" data-bs-target="#modal-img-thumb">
+                            <img src="https://placehold.co/200x200/6f42c1/ffffff?text=.img-thumbnail" class="img-thumbnail" alt="Imagem Thumbnail">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Exemplo: Alinhamento de Imagens</h2></div>
+            <div class="slide-body">
+                <div class="container">
+                    <div class="row gy-5 align-items-center">
+                        <div class="col-lg-6 animatable delay-1">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Flutuantes</h3>
+                            <div class="p-4 rounded-4 component-demo clearfix" data-bs-toggle="modal" data-bs-target="#modal-img-float">
+                                <img src="https://placehold.co/150x150" class="rounded float-start me-3" alt="...">
+                                <img src="https://placehold.co/150x150" class="rounded float-end ms-3" alt="...">
+                                <p class="text-start">Use <code>.float-start</code> e <code>.float-end</code> para alinhar.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 animatable delay-2">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Centralizada</h3>
+                            <div class="p-4 rounded-4 component-demo text-center" data-bs-toggle="modal" data-bs-target="#modal-img-center">
+                                <img src="https://placehold.co/200x150" class="rounded mx-auto d-block" alt="...">
+                                <p class="mt-2 small text-muted">Use <code>.mx-auto .d-block</code></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Boas Práticas com Imagens</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4">
+                        <div class="col-lg-6 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-aspect-ratio fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">Performance</h4>
+                                <p class="text-muted">Sempre otimize suas imagens antes de enviá-las para o site. Ferramentas como Squoosh ou TinyPNG podem reduzir drasticamente o tamanho do arquivo sem perder qualidade.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-universal-access fs-1 text-info"></i>
+                                <h4 class="fw-bold my-3">Acessibilidade (Atributo `alt`)</h4>
+                                <p class="text-muted">O atributo <code>alt</code> é crucial. Descreva a imagem para leitores de tela e para o caso da imagem não carregar. É importante para SEO e para acessibilidade.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-card-heading me-3"></i>O que são Cards?</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">São contêineres de conteúdo flexíveis e auto-contidos.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box" style="border-color: #0dcaf0;">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-box-seam me-2"></i>Propósito</h4>
+                        <p class="concept-text">Perfeitos para agrupar informações relacionadas, como um post de blog, um produto ou um perfil de usuário, em uma única unidade visual.</p>
+                        <hr class="my-5">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-code-braces me-2"></i>Anatomia Básica</h4>
+                        <p class="concept-text"><code class="bg-light p-2 rounded">.card</code>: O contêiner principal.</p>
+                        <p class="concept-text mt-3"><code class="bg-light p-2 rounded">.card-body</code>: Onde a maior parte do conteúdo reside.</p>
+                        <p class="concept-text mt-3">Outros elementos comuns: <code class="bg-light p-2 rounded">.card-title</code> e <code class="bg-light p-2 rounded">.card-text</code>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Anatomia do Card</h2></div>
+            <div class="slide-body">
+                <div class="row justify-content-center animatable">
+                    <div class="col-md-12 col-lg-12">
+                        <div class="p-4 rounded-4 component-demo" data-bs-toggle="modal" data-bs-target="#modal-card-anatomy">
+                            <div class="card shadow-sm">
+                            <div class="card-header fw-bold">Header</div>
+                            <img src="https://placehold.co/400x150" class="card-img-top" alt="Card Image">
+                            <div class="card-body">
+                                <h5 class="card-title">Card Title</h5>
+                                <p class="card-text">Este é o corpo do card.</p>
+                                <a href="#" class="btn btn-primary">Action</a>
+                            </div>
+                            <div class="card-footer text-muted">Footer</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Layouts de Cards</h2></div>
+            <div class="slide-body">
+                <div class="container">
+                    <div class="row gy-5">
+                        <div class="col-lg-6 animatable delay-1">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Card Group</h3>
+                            <div class="p-4 rounded-4 component-demo" data-bs-toggle="modal" data-bs-target="#modal-card-group">
+                                <div class="card-group">
+                                    <div class="card"><div class="card-body"><h5 class="card-title">Card 1</h5><p class="card-text small">Conteúdo menor.</p></div></div>
+                                    <div class="card"><div class="card-body"><h5 class="card-title">Card 2</h5><p class="card-text small">Conteúdo maior.</p></div></div>
+                                    <div class="card"><div class="card-body"><h5 class="card-title">Card 3</h5><p class="card-text small">Conteúdo médio.</p></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 animatable delay-2">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Image Overlay</h3>
+                            <div class="p-4 rounded-4 component-demo" data-bs-toggle="modal" data-bs-target="#modal-card-overlay">
+                                <div class="card text-bg-dark">
+                                <img src="https://placehold.co/400x250/343a40/ffffff?text=Background" class="card-img" alt="...">
+                                <div class="card-img-overlay">
+                                    <h5 class="card-title">Card com Sobreposição</h5>
+                                    <p class="card-text">Texto sobre a imagem.</p>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Quando Usar Cards?</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4">
+                        <div class="col-lg-3 col-6 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-person-badge fs-1 text-primary"></i>
+                                <h5 class="fw-bold my-3">Perfis de Usuário</h5>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-6 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-cart fs-1 text-success"></i>
+                                <h5 class="fw-bold my-3">Produtos</h5>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-6 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-newspaper fs-1 text-warning"></i>
+                                <h5 class="fw-bold my-3">Posts de Blog</h5>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-6 animatable delay-4">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-pin-map fs-1 text-info"></i>
+                                <h5 class="fw-bold my-3">Localizações</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+             <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Cards com Grid Responsivo</h2></div>
+             <div class="slide-body">
+                <div class="p-4 rounded-4 component-demo w-100 animatable" data-bs-toggle="modal" data-bs-target="#modal-card-grid">
+                    <div class="row">
+                        <div class="col-sm-6 col-lg-3 mb-4 mb-lg-0">
+                            <div class="card h-100"><div class="card-body"><h5 class="card-title">Card A</h5></div></div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3 mb-4 mb-lg-0">
+                            <div class="card h-100"><div class="card-body"><h5 class="card-title">Card B</h5></div></div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3 mb-4 mb-sm-0">
+                            <div class="card h-100"><div class="card-body"><h5 class="card-title">Card C</h5></div></div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card h-100"><div class="card-body"><h5 class="card-title">Card D</h5></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Resumo da Aula</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-primary-subtle border-primary-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-primary-emphasis">Botões</h3>
+                                <p>Para todas as ações, use a classe base <code class="bg-white p-1 rounded">.btn</code> e adicione uma cor com <code class="bg-white p-1 rounded">.btn-primary</code>.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-success-subtle border-success-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-success-emphasis">Imagens</h3>
+                                <p>Para responsividade instantânea, use a classe mágica <code class="bg-white p-1 rounded">.img-fluid</code>.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-info-subtle border-info-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-info-emphasis">Cards</h3>
+                                <p>Para agrupar qualquer conteúdo, use a estrutura principal com <code class="bg-white p-1 rounded">.card</code> e <code class="bg-white p-1 rounded">.card-body</code>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-btn-solid" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Botões Sólidos</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Botões Sólidos --&gt;
+&lt;button type="button" class="btn btn-primary"&gt;Primary&lt;/button&gt;
+&lt;button type="button" class="btn btn-secondary"&gt;Secondary&lt;/button&gt;
+&lt;button type="button" class="btn btn-success"&gt;Success&lt;/button&gt;
+&lt;button type="button" class="btn btn-danger"&gt;Danger&lt;/button&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-btn-outline" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Botões Outline</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Botões Outline --&gt;
+&lt;button type="button" class="btn btn-outline-primary"&gt;Primary&lt;/button&gt;
+&lt;button type="button" class="btn btn-outline-secondary"&gt;Secondary&lt;/button&gt;
+&lt;button type="button" class="btn btn-outline-success"&gt;Success&lt;/button&gt;
+&lt;button type="button" class="btn btn-outline-danger"&gt;Danger&lt;/button&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-btn-sizes" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Tamanhos de Botões</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Botões com tamanhos diferentes --&gt;
+&lt;button type="button" class="btn btn-primary btn-lg"&gt;Botão Grande&lt;/button&gt;
+&lt;button type="button" class="btn btn-secondary"&gt;Botão Normal&lt;/button&gt;
+&lt;button type="button" class="btn btn-info btn-sm"&gt;Botão Pequeno&lt;/button&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-btn-states" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Estados de Botões</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Estado ativo para tag 'a' --&gt;
+&lt;a href="#" class="btn btn-primary active" role="button"&gt;Link Ativo&lt;/a&gt;
+&lt;!-- Estado desativado para tag 'button' --&gt;
+&lt;button class="btn btn-primary" type="submit" disabled&gt;Botão Desativado&lt;/button&gt;
+&lt;!-- Estado de Carregamento (Loading) --&gt;
+&lt;button class="btn btn-primary" type="button"&gt;
+  &lt;span class="spinner-border spinner-border-sm"&gt;&lt;/span&gt;
+  &lt;span role="status"&gt; Loading...&lt;/span&gt;
+&lt;/button&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-btn-icons" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Botões com Ícones</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Requer a biblioteca Bootstrap Icons --&gt;
+&lt;button type="button" class="btn btn-success"&gt;
+  &lt;i class="bi bi-check-circle me-2"&gt;&lt;/i&gt; Salvar
+&lt;/button&gt;
+&lt;button type="button" class="btn btn-danger"&gt;
+  &lt;i class="bi bi-trash me-2"&gt;&lt;/i&gt; Excluir
+&lt;/button&gt;
+&lt;button type="button" class="btn btn-warning"&gt;
+  &lt;i class="bi bi-pencil-square me-2"&gt;&lt;/i&gt; Editar
+&lt;/button&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-btn-block" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Botões Block</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Botões de largura total --&gt;
+&lt;div class="d-grid gap-2"&gt;
+  &lt;button class="btn btn-primary" type="button"&gt;Entrar&lt;/button&gt;
+  &lt;button class="btn btn-outline-secondary" type="button"&gt;Criar Conta&lt;/button&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-img-fluid" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Imagem Fluida</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- A classe .img-fluid torna a imagem responsiva --&gt;
+&lt;img src="..." class="img-fluid" alt="Imagem Responsiva"&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-img-thumb" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Imagem Thumbnail</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- A classe .img-thumbnail adiciona uma borda estilizada --&gt;
+&lt;img src="..." class="img-thumbnail" alt="Imagem Thumbnail"&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-img-float" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Imagens Flutuantes</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- A classe .clearfix é importante no container para limpar o float --&gt;
+&lt;div class="clearfix"&gt;
+  &lt;img src="..." class="rounded float-start me-3" alt="Imagem à Esquerda"&gt;
+  &lt;img src="..." class="rounded float-end ms-3" alt="Imagem à Direita"&gt;
+  &lt;p&gt;O texto flui ao redor das imagens...&lt;/p&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-img-center" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Imagem Centralizada</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- .mx-auto (margem horizontal automática) e .d-block (display block) --&gt;
+&lt;img src="..." class="rounded mx-auto d-block" alt="Imagem Centralizada"&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-img-figure" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Figure com Legenda</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;figure class="figure"&gt;
+  &lt;img src="..." class="figure-img img-fluid rounded" alt="..."&gt;
+  &lt;figcaption class="figure-caption text-center"&gt;
+    Legenda da imagem.
+  &lt;/figcaption&gt;
+&lt;/figure&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-card-anatomy" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Anatomia do Card</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;div class="card"&gt;
+  &lt;div class="card-header"&gt;Card Header&lt;/div&gt;
+  &lt;img src="..." class="card-img-top" alt="..."&gt;
+  &lt;div class="card-body"&gt;
+    &lt;h5 class="card-title"&gt;Card Title&lt;/h5&gt;
+    &lt;p class="card-text"&gt;Conteúdo do card.&lt;/p&gt;
+    &lt;a href="#" class="btn btn-primary"&gt;Botão&lt;/a&gt;
+  &lt;/div&gt;
+  &lt;div class="card-footer text-muted"&gt;Card Footer&lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-card-group" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Card Group</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Os cards terão a mesma altura e largura --&gt;
+&lt;div class="card-group"&gt;
+  &lt;div class="card"&gt;
+    &lt;div class="card-body"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="card"&gt;
+    &lt;div class="card-body"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="card"&gt;
+    &lt;div class="card-body"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-card-overlay" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Card com Sobreposição</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;div class="card text-bg-dark"&gt;
+  &lt;img src="..." class="card-img" alt="..."&gt;
+  &lt;div class="card-img-overlay"&gt;
+    &lt;h5 class="card-title"&gt;Título do Card&lt;/h5&gt;
+    &lt;p class="card-text"&gt;Texto sobre a imagem.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-card-grid" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Cards com Grid Responsivo</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Usando o sistema de Grid do Bootstrap --&gt;
+&lt;div class="row"&gt;
+  &lt;div class="col-sm-6 col-lg-3 mb-4"&gt;
+    &lt;div class="card h-100"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="col-sm-6 col-lg-3 mb-4"&gt;
+    &lt;div class="card h-100"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="col-sm-6 col-lg-3 mb-4"&gt;
+    &lt;div class="card h-100"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="col-sm-6 col-lg-3 mb-4"&gt;
+    &lt;div class="card h-100"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        function updateProgress() {
+            const progress = ((currentSlideIndex + 1) / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+        }
+        
+        function showSlide(index) {
+            // Reseta animações antes de mudar o slide
+            const animatableElements = document.querySelectorAll('.animatable');
+            animatableElements.forEach(el => {
+                el.classList.remove('fade-in-up');
+            });
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            const activeSlide = slides[index];
+            activeSlide.classList.add('active');
+            
+            // Ativa animações para o slide atual
+            const elementsToAnimate = activeSlide.querySelectorAll('.animatable');
+            elementsToAnimate.forEach(el => {
+                el.classList.add('fade-in-up');
+            });
+            
+            document.getElementById('currentSlide').textContent = index + 1;
+            updateProgress();
+        }
+        
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        function previousSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                event.preventDefault();
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                previousSlide();
+            }
+        });
+        
+        // Mostra o primeiro slide e ativa suas animações
+        showSlide(currentSlideIndex);
+    </script>
+</body>
+</html>
