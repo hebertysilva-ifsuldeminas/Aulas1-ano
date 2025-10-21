@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Bootstrap - Formulários</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, rgba(121, 82, 179, 0.2) 0%, rgba(121, 82, 179, 0) 60%), #ffffff;
+        }
+        
+        .slide {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 3rem 4rem;
+            flex-direction: column;
+            justify-content: flex-start;
+            z-index: 100;
+        }
+        
+        .slide.active {
+            display: flex;
+            z-index: 200;
+        }
+
+        .slide-header {
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .slide-body {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            color: #343a40;
+        }
+        
+        .component-demo {
+            background-color: #ffffff;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+            /* REMOVIDO cursor: pointer; daqui */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            position: relative;
+        }
+        
+        .component-demo:hover {
+            border-color: #6f42c1;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        /* Ícone de clique */
+        .click-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: #adb5bd;
+            transition: all 0.3s ease;
+            z-index: 300; /* Ícone acima do conteúdo do demo */
+            cursor: pointer; /* Cursor pointer APENAS no ícone */
+        }
+
+        .component-demo:hover .click-icon {
+            color: #6f42c1;
+            transform: scale(1.2);
+        }
+
+        .concept-box, .info-card {
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+
+        .concept-box {
+            border-top: 5px solid #6f42c1;
+        }
+        
+        .slide-counter, .nav-button, .progress-bar-container {
+            position: fixed;
+            /* Z-index abaixo dos modais e backdrop (Bootstrap usa > 1040) */
+            z-index: 1030;
+        }
+
+        .slide-counter {
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar-container {
+            top: 0; left: 0;
+            height: 4px; width: 100%;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #3b82f6);
+            transition: width 0.3s ease;
+        }
+        
+        .modal-body pre { border-radius: 0.5rem; }
+
+        .concept-text {
+            font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+            line-height: 1.6;
+        }
+        .concept-text code {
+            font-size: clamp(1rem, 2.2vw, 1.5rem);
+            padding: 0.3em 0.6em !important;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animatable { opacity: 0; }
+        .fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <div class="slide active justify-content-center">
+        <div class="slide-content text-center">
+            <div class="mb-4" style="animation: float 3s ease-in-out infinite;">
+                <i class="bi bi-input-cursor-text" style="font-size: 8rem; color: #7952b3; text-shadow: 0 0 30px rgba(121, 82, 179, 0.5);"></i>
+            </div>
+            <h1 class="mb-3 display-1 fw-bolder animatable fade-in-up" style="color: #563d7c; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Dominando Formulários</h1>
+            <p class="mb-4 display-5 fw-light animatable fade-in-up delay-1" style="color: #6f42c1;">O Guia Completo com Bootstrap 5</p>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Objetivo da Aula</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-1 fw-light text-secondary">Capacitar os alunos a construir formulários modernos, responsivos e visualmente atraentes com Bootstrap, aplicando as melhores práticas de estrutura, layout e validação.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">A Base dos Formulários</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">A classe mais importante que você vai usar é a <code>.form-control</code>.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-magic me-2"></i>O que ela faz?</h4>
+                        <p class="concept-text">Aplica <code>width: 100%</code>, padding, bordas e estilos de foco a qualquer <code>&lt;input&gt;</code>, <code>&lt;textarea&gt;</code> e <code>&lt;select&gt;</code>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: O Essencial <code>.form-control</code></h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-5 rounded-4 component-demo"> 
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-form-control"></i>
+                        <div class="mb-3">
+                          <label for="exemploEmail" class="form-label">Endereço de E-mail</label>
+                          <input type="email" class="form-control" id="exemploEmail" placeholder="nome@exemplo.com">
+                        </div>
+                        <div class="mb-3">
+                          <label for="exemploTextarea" class="form-label">Sua Mensagem</label>
+                          <textarea class="form-control" id="exemploTextarea" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Estruturando Elementos</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <p class="fs-3 fw-light text-secondary mb-5 animatable">Além do <code>.form-control</code>, existem classes para cada tipo de campo.</p>
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-chevron-down fs-1 text-primary"></i>
+                                <h4 class="fw-bold my-3">Selects</h4>
+                                <p class="text-muted">Use <code>.form-select</code> para estilizar caixas de seleção.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-check2-square fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">Checks & Radios</h4>
+                                <p class="text-muted">Use <code>.form-check</code> como um container para o input e o label.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-toggle-on fs-1 text-info"></i>
+                                <h4 class="fw-bold my-3">Switches</h4>
+                                <p class="text-muted">Adicione <code>.form-switch</code> a um <code>.form-check</code> para um visual de interruptor.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Selects, Checks e Switches</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-5 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-form-elements"></i>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <select class="form-select mb-3">
+                                    <option selected>Selecione uma Opção</option>
+                                    <option value="1">Opção 1</option>
+                                </select>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox">
+                                    <label class="form-check-label">Lembrar de mim</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadio">
+                                    <label class="form-check-label">Opção Rádio</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center justify-content-center mt-4 mt-md-0">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" style="font-size: 2rem;">
+                                    <label class="form-check-label ms-2" style="font-size: 1.5rem;">Ativar notificações</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Layouts de Formulário</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <p class="fs-3 fw-light text-secondary mb-5 animatable">Organize seus campos com o Grid System e Input Groups.</p>
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-grid-1x2 fs-1 text-primary"></i>
+                                <h4 class="fw-bold my-3">Grid</h4>
+                                <p class="text-muted">Use <code>.row</code> e <code>.col-*</code> para posicionar campos lado a lado de forma responsiva.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-input-cursor fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">Input Groups</h4>
+                                <p class="text-muted">Adicione prefixos, sufixos ou botões diretamente colados aos seus inputs.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-box-arrow-in-up-left fs-1 text-info"></i>
+                                <h4 class="fw-bold my-3">Floating Labels</h4>
+                                <p class="text-muted">Crie um efeito moderno onde o label "flutua" para cima do campo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Layouts com Grid e Input Groups</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-5 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-form-layouts"></i>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Primeiro Nome</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Sobrenome</label>
+                                <input type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">@</span>
+                            <input type="text" class="form-control" placeholder="Nome de usuário">
+                        </div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Buscar...">
+                            <button class="btn btn-outline-secondary" type="button">Buscar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Floating Labels</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-5 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-form-floating"></i>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="floatingInput" placeholder="nome@exemplo.com">
+                            <label for="floatingInput">Endereço de E-mail</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="floatingPassword" placeholder="Senha">
+                            <label for="floatingPassword">Senha</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-check2-circle me-3"></i>Validação de Formulários</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">Fornecer feedback ao usuário é crucial. O Bootstrap estiliza a validação nativa do navegador.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box" style="border-color: #198754;">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-code-braces me-2"></i>Como Ativar</h4>
+                        <p class="concept-text">Adicione a classe <code class="bg-light p-2 rounded">.needs-validation</code> e o atributo <code class="bg-light p-2 rounded">novalidate</code> ao seu <code>&lt;form&gt;</code>.</p>
+                        <p class="concept-text mt-3">Adicione as divs <code class="bg-light p-2 rounded">.valid-feedback</code> e <code class="bg-light p-2 rounded">.invalid-feedback</code> após os campos.</p>
+                        <p class="concept-text mt-3 text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Requer um pequeno script JavaScript para funcionar!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Validação</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-5 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-form-validation"></i>
+                        <form class="row g-3">
+                            <div class="col-md-6">
+                                <label for="validationCustom01" class="form-label">Primeiro nome</label>
+                                <input type="text" class="form-control is-valid" id="validationCustom01" value="Mark" required>
+                                <div class="valid-feedback">Tudo certo!</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="validationServer02" class="form-label">Sobrenome</label>
+                                <input type="text" class="form-control is-invalid" id="validationServer02" required>
+                                <div class="invalid-feedback">Por favor, insira um sobrenome.</div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+    <div class="modal fade" id="modal-form-control" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: .form-control</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;div class="mb-3"&gt;
+  &lt;label for="exemploEmail" class="form-label"&gt;Endereço de E-mail&lt;/label&gt;
+  &lt;input type="email" class="form-control" id="exemploEmail" placeholder="nome@exemplo.com"&gt;
+&lt;/div&gt;
+
+&lt;div class="mb-3"&gt;
+  &lt;label for="exemploTextarea" class="form-label"&gt;Sua Mensagem&lt;/label&gt;
+  &lt;textarea class="form-control" id="exemploTextarea" rows="3"&gt;&lt;/textarea&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-form-elements" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Selects, Checks e Switches</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Select --&gt;
+&lt;select class="form-select"&gt;
+  &lt;option selected&gt;Selecione uma Opção&lt;/option&gt;
+  &lt;option value="1"&gt;Opção 1&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;!-- Checkbox --&gt;
+&lt;div class="form-check"&gt;
+  &lt;input class="form-check-input" type="checkbox" id="check1"&gt;
+  &lt;label class="form-check-label" for="check1"&gt;Lembrar de mim&lt;/label&gt;
+&lt;/div&gt;
+
+&lt;!-- Radio Button --&gt;
+&lt;div class="form-check"&gt;
+  &lt;input class="form-check-input" type="radio" name="exampleRadio" id="radio1"&gt;
+  &lt;label class="form-check-label" for="radio1"&gt;Opção Rádio&lt;/label&gt;
+&lt;/div&gt;
+
+&lt;!-- Switch --&gt;
+&lt;div class="form-check form-switch"&gt;
+  &lt;input class="form-check-input" type="checkbox" role="switch" id="switch1"&gt;
+  &lt;label class="form-check-label" for="switch1"&gt;Ativar notificações&lt;/label&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-form-layouts" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Grid e Input Groups</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Grid --&gt;
+&lt;div class="row"&gt;
+    &lt;div class="col-md-6 mb-3"&gt;
+      &lt;label class="form-label"&gt;Primeiro Nome&lt;/label&gt;
+      &lt;input type="text" class="form-control"&gt;
+    &lt;/div&gt;
+    &lt;div class="col-md-6 mb-3"&gt;
+      &lt;label class="form-label"&gt;Sobrenome&lt;/label&gt;
+      &lt;input type="text" class="form-control"&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Input Group com prefixo --&gt;
+&lt;div class="input-group mb-3"&gt;
+    &lt;span class="input-group-text"&gt;@&lt;/span&gt;
+    &lt;input type="text" class="form-control" placeholder="Nome de usuário"&gt;
+&lt;/div&gt;
+
+&lt;!-- Input Group com botão --&gt;
+&lt;div class="input-group"&gt;
+    &lt;input type="text" class="form-control" placeholder="Buscar..."&gt;
+    &lt;button class="btn btn-outline-secondary" type="button"&gt;Buscar&lt;/button&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-form-floating" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Floating Labels</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- O input DEVE vir antes do label --&gt;
+&lt;div class="form-floating mb-3"&gt;
+  &lt;input type="email" class="form-control" id="floatingInput" placeholder="nome@exemplo.com"&gt;
+  &lt;label for="floatingInput"&gt;Endereço de E-mail&lt;/label&gt;
+&lt;/div&gt;
+&lt;div class="form-floating"&gt;
+  &lt;input type="password" class="form-control" id="floatingPassword" placeholder="Senha"&gt;
+  &lt;label for="floatingPassword"&gt;Senha&lt;/label&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-form-validation" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Validação</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Adicione .needs-validation e novalidate ao form --&gt;
+&lt;form class="row g-3 needs-validation" novalidate&gt;
+  &lt;div class="col-md-6"&gt;
+    &lt;label for="validationCustom01" class="form-label"&gt;Primeiro nome&lt;/label&gt;
+    &lt;input type="text" class="form-control" id="validationCustom01" required&gt;
+    &lt;div class="valid-feedback"&gt;Tudo certo!&lt;/div&gt;
+    &lt;div class="invalid-feedback"&gt;Por favor, insira um nome.&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="col-md-6"&gt;
+    &lt;label for="validationCustom02" class="form-label"&gt;Sobrenome&lt;/label&gt;
+    &lt;input type="text" class="form-control" id="validationCustom02" required&gt;
+    &lt;div class="invalid-feedback"&gt;Por favor, insira um sobrenome.&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="col-12"&gt;
+    &lt;button class="btn btn-primary" type="submit"&gt;Enviar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;</code></pre><hr><pre><code class="language-javascript">// SCRIPT NECESSÁRIO NO FINAL DA PÁGINA
+(function () {
+  'use strict'
+  var forms = document.querySelectorAll('.needs-validation')
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()</code></pre></div></div></div></div>
+    
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="slide-counter"><i class="bi bi-display me-2"></i><span id="currentSlide">1</span> / <span id="totalSlides"></span></div>
+    <div class="position-fixed top-50 start-0 translate-middle-y z-3 ms-4"><button onclick="previousSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-left fs-5 lh-1"></i></button></div>
+    <div class="position-fixed top-50 end-0 translate-middle-y z-3 me-4"><button onclick="nextSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-right fs-5 lh-1"></i></button></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        function updateProgress() {
+            const progress = ((currentSlideIndex + 1) / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+        }
+        
+        function showSlide(index) {
+            const animatableElements = document.querySelectorAll('.animatable');
+            animatableElements.forEach(el => {
+                el.classList.remove('fade-in-up');
+            });
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            const activeSlide = slides[index];
+            activeSlide.classList.add('active');
+            
+            const elementsToAnimate = activeSlide.querySelectorAll('.animatable');
+            elementsToAnimate.forEach(el => {
+                // Força o reinício da animação removendo e adicionando a classe
+                el.style.animation = 'none';
+                el.offsetHeight; /* trigger reflow */
+                el.style.animation = null; 
+                el.classList.add('fade-in-up');
+            });
+            
+            document.getElementById('currentSlide').textContent = index + 1;
+            updateProgress();
+        }
+        
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        function previousSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                event.preventDefault();
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                previousSlide();
+            }
+        });
+        
+        window.addEventListener('load', () => {
+            showSlide(currentSlideIndex);
+        });
+    </script>
+</body>
+</html>
