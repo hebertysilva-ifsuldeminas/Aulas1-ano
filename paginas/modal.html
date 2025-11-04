@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Bootstrap - Modais</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, rgba(121, 82, 179, 0.2) 0%, rgba(121, 82, 179, 0) 60%), #ffffff;
+        }
+        
+        .slide {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 3rem 4rem;
+            flex-direction: column;
+            justify-content: flex-start;
+            z-index: 100;
+        }
+        
+        .slide.active {
+            display: flex;
+            z-index: 200;
+        }
+
+        .slide-header {
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .slide-body {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            color: #343a40;
+        }
+        
+        .component-demo {
+            background-color: #ffffff;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            position: relative;
+        }
+        
+        .component-demo:hover {
+            border-color: #6f42c1;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .click-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: #adb5bd;
+            transition: all 0.3s ease;
+            z-index: 300;
+            cursor: pointer;
+        }
+
+        .component-demo:hover .click-icon {
+            color: #6f42c1;
+            transform: scale(1.2);
+        }
+
+        .concept-box, .info-card {
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+
+        .concept-box {
+            border-top: 5px solid #6f42c1;
+        }
+        
+        .slide-counter, .nav-button, .progress-bar-container {
+            position: fixed;
+            z-index: 1030;
+        }
+
+        .slide-counter {
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar-container {
+            top: 0; left: 0;
+            height: 4px; width: 100%;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #3b82f6);
+            transition: width 0.3s ease;
+        }
+        
+        .modal-body pre { border-radius: 0.5rem; }
+
+        .concept-text {
+            font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+            line-height: 1.6;
+        }
+        .concept-text code {
+            font-size: clamp(1rem, 2.2vw, 1.5rem);
+            padding: 0.3em 0.6em !important;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animatable { opacity: 0; }
+        .fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <div class="slide active justify-content-center">
+        <div class="slide-content text-center">
+            <div class="mb-4" style="animation: float 3s ease-in-out infinite;">
+                <i class="bi bi-window-stack" style="font-size: 8rem; color: #7952b3; text-shadow: 0 0 30px rgba(121, 82, 179, 0.5);"></i>
+            </div>
+            <h1 class="mb-3 display-1 fw-bolder animatable fade-in-up" style="color: #563d7c; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Dominando Modais</h1>
+            <p class="mb-4 display-5 fw-light animatable fade-in-up delay-1" style="color: #6f42c1;">O Guia Completo com Bootstrap 5</p>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-window me-3"></i>O que é um Modal?</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">Uma janela de diálogo (pop-up) que aparece sobre o conteúdo da página.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-bullseye me-2"></i>Propósito</h4>
+                        <p class="concept-text">Usado para notificações, formulários (login), confirmações (<code class="bg-light p-2 rounded">"Tem certeza?"</code>) ou para mostrar conteúdo extra.</p>
+                        <hr class="my-5">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-toggles me-2"></i>Como funciona?</h4>
+                        <p class="concept-text">É acionado por um botão (<code class="bg-light p-2 rounded">data-bs-toggle="modal"</code>) e requer o JavaScript do Bootstrap para funcionar.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Anatomia do Modal</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <p class="fs-3 fw-light text-secondary mb-5 animatable">Um modal é composto por 3 partes principais.</p>
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-file-earmark-text fs-1 text-primary"></i>
+                                <h4 class="fw-bold my-3">Header (<code>.modal-header</code>)</h4>
+                                <p class="text-muted">Contém o título (<code>.modal-title</code>) e o botão de fechar (<code>.btn-close</code>).</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-body-text fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">Body (<code>.modal-body</code>)</h4>
+                                <p class="text-muted">O conteúdo principal do seu modal (texto, formulários, imagens).</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-hand-index-thumb fs-1 text-info"></i>
+                                <h4 class="fw-bold my-3">Footer (<code>.modal-footer</code>)</h4>
+                                <p class="text-muted">Onde ficam os botões de ação (Salvar, Fechar, Confirmar).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Modal Básico</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-5 rounded-4 component-demo d-flex justify-content-center align-items-center">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-basic"></i>
+                        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#modal-demo-basic">
+                          Abrir Modal de Demonstração
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Tamanhos e Alinhamento</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-5 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-variations"></i>
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-demo-sm">
+                              Modal Pequeno (.modal-sm)
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-demo-lg">
+                              Modal Grande (.modal-lg)
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-demo-centered">
+                              Modal Centralizado
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Conteúdo Longo e Backdrop Estático</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-5 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-advanced"></i>
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-demo-scrollable">
+                              Modal Rolável
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-demo-static">
+                              Backdrop Estático
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Boas Práticas com Modais</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-eye-slash fs-1 text-danger"></i>
+                                <h4 class="fw-bold my-3">Não Abuse</h4>
+                                <p class="text-muted">Modais interrompem o fluxo do usuário. Use com moderação e apenas para informações essenciais.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-bullseye fs-1 text-primary"></i>
+                                <h4 class="fw-bold my-3">Seja Focado</h4>
+                                <p class="text-muted">Use modais para tarefas curtas e diretas, como um formulário de login ou uma confirmação de exclusão.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-door-open fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">Tenha Saídas Claras</h4>
+                                <p class="text-muted">Sempre inclua um botão de fechar (`.btn-close`) E um botão de "Fechar" ou "Cancelar" no rodapé.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Resumo: Modal</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-primary-subtle border-primary-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-primary-emphasis">Acionador</h3>
+                                <p>Use <code class="bg-white p-1 rounded">data-bs-toggle="modal"</code> e <code class="bg-white p-1 rounded">data-bs-target="#ID"</code> em um botão.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-info-subtle border-info-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-info-emphasis">Estrutura</h3>
+                                <p><code>.modal</code> > <code>.modal-dialog</code> > <code>.modal-content</code> > (header, body, footer).</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-danger-subtle border-danger-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-danger-emphasis">JavaScript</h3>
+                                <p>O JavaScript Bundle do Bootstrap (<code>bootstrap.bundle.min.js</code>) é <strong>obrigatório</strong> para funcionar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="modal-demo-basic" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Título do Modal</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Este é um modal de demonstração básico.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <button type="button" class="btn btn-primary">Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="modal-demo-sm" tabindex="-1">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header"><h5 class="modal-title">Modal Pequeno</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body"><p>Este modal usa a classe <code>.modal-sm</code>.</p></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="modal-demo-lg" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header"><h5 class="modal-title">Modal Grande</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body"><p>Este modal usa a classe <code>.modal-lg</code>.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modal-demo-centered" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header"><h5 class="modal-title">Modal Centralizado</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body"><p>Este modal usa a classe <code>.modal-dialog-centered</code>.</p></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="modal-demo-scrollable" tabindex="-1">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header"><h5 class="modal-title">Modal Rolável</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body">
+            <p>Este modal rola o conteúdo interno.</p>
+            <p>Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean lacinia bibendum nulla sed consectetur. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Donec sed odio dui. Donec ullamcorper nulla non metus auctor fringilla. Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean lacinia bibendum nulla sed consectetur. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Donec sed odio dui. Donec ullamcorper nulla non metus auctor fringilla. Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean lacinia bibendum nulla sed consectetur. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Donec sed odio dui. Donec ullamcorper nulla non metus auctor fringilla. Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean lacinia bibendum nulla sed consectetur. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Donec sed odio dui. Donec ullamcorper nulla non metus auctor fringilla. Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean lacinia bibendum nulla sed consectetur. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Donec sed odio dui. Donec ullamcorper nulla non metus auctor fringilla.</p>
+          </div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="modal-demo-static" tabindex="-1" data-bs-backdrop="static">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header"><h5 class="modal-title">Backdrop Estático</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body"><p>Tente clicar fora deste modal. Ele não vai fechar. Use o atributo <code>data-bs-backdrop="static"</code>.</p></div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="modal-code-basic" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Modal Básico</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- 1. O Botão Acionador --&gt;
+&lt;button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#meuModal"&gt;
+  Abrir Modal
+&lt;/button&gt;
+
+&lt;!-- 2. A Estrutura do Modal (pode ir em qualquer lugar) --&gt;
+&lt;div class="modal fade" id="meuModal" tabindex="-1"&gt;
+  &lt;div class="modal-dialog"&gt;
+    &lt;div class="modal-content"&gt;
+      &lt;div class="modal-header"&gt;
+        &lt;h5 class="modal-title"&gt;Título do Modal&lt;/h5&gt;
+        &lt;button type="button" class="btn-close" data-bs-dismiss="modal"&gt;&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class="modal-body"&gt;
+        &lt;p&gt;Este é o conteúdo do modal.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class="modal-footer"&gt;
+        &lt;button type="button" class="btn btn-secondary" data-bs-dismiss="modal"&gt;Fechar&lt;/button&gt;
+        &lt;button type="button" class="btn btn-primary"&gt;Salvar&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-variations" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Tamanhos e Alinhamento</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Modal Pequeno --&gt;
+&lt;div class="modal-dialog modal-sm"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- Modal Grande --&gt;
+&lt;div class="modal-dialog modal-lg"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- Modal Extra Grande --&gt;
+&lt;div class="modal-dialog modal-xl"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- Modal Centralizado --&gt;
+&lt;div class="modal-dialog modal-dialog-centered"&gt;
+  ...
+&lt;/div&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-advanced" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Avançado</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Modal com Conteúdo Rolável --&gt;
+&lt;!-- Adicione .modal-dialog-scrollable ao .modal-dialog --&gt;
+&lt;div class="modal-dialog modal-dialog-scrollable"&gt;
+  &lt;div class="modal-content"&gt;
+    &lt;div class="modal-header"&gt;...&lt;/div&gt;
+    &lt;div class="modal-body"&gt;
+      (Muito conteúdo aqui...)
+    &lt;/div&gt;
+    &lt;div class="modal-footer"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Modal com Backdrop Estático --&gt;
+&lt;!-- Adicione data-bs-backdrop="static" ao .modal --&gt;
+&lt;div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" tabindex="-1"&gt;
+  &lt;div class="modal-dialog"&gt;
+    ... (Não fecha ao clicar fora)
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="slide-counter"><i class="bi bi-display me-2"></i><span id="currentSlide">1</span> / <span id="totalSlides"></span></div>
+    <div class="position-fixed top-50 start-0 translate-middle-y z-3 ms-4"><button onclick="previousSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-left fs-5 lh-1"></i></button></div>
+    <div class="position-fixed top-50 end-0 translate-middle-y z-3 me-4"><button onclick="nextSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-right fs-5 lh-1"></i></button></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        function updateProgress() {
+            const progress = ((currentSlideIndex + 1) / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+        }
+        
+        function showSlide(index) {
+            const animatableElements = document.querySelectorAll('.animatable');
+            animatableElements.forEach(el => {
+                el.classList.remove('fade-in-up');
+            });
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            const activeSlide = slides[index];
+            activeSlide.classList.add('active');
+            
+            const elementsToAnimate = activeSlide.querySelectorAll('.animatable');
+            elementsToAnimate.forEach(el => {
+                el.style.animation = 'none';
+                el.offsetHeight;
+                el.style.animation = null; 
+                el.classList.add('fade-in-up');
+            });
+            
+            document.getElementById('currentSlide').textContent = index + 1;
+            updateProgress();
+        }
+        
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        function previousSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                event.preventDefault();
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                previousSlide();
+            }
+        });
+        
+        window.addEventListener('load', () => {
+            showSlide(currentSlideIndex);
+        });
+    </script>
+</body>
+</html>

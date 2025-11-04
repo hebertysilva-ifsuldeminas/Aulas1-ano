@@ -241,8 +241,8 @@ ul {
 }
 
 .card:hover {
-    transform: translateY(-8px) scale(1.01);
-    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px) scale(1.1);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
 }
 
 .card-icon-wrapper {
@@ -267,11 +267,7 @@ ul {
     animation: bounceIn 0.8s forwards; /* Animação de entrada do ícone */
 }
 
-/* Cores de ícone específicas */
-.icon-html { color: #e44d26; background: #fff; border-radius: 50%; padding: 0.4em; }
-.icon-css { color: #264de4; background: #fff; border-radius: 50%; padding: 0.4em; }
-.icon-js { color: #f0db4f; background: #2d2d2d; border-radius: 50%; padding: 0.4em; }
-.icon-backend { color: #333; background: #fff; border-radius: 50%; padding: 0.4em; }
+
 
 
 .card-icon-wrapper::before { /* Efeito de brilho de fundo */

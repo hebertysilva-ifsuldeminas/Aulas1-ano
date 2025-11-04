@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Bootstrap - Offcanvas</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, rgba(121, 82, 179, 0.2) 0%, rgba(121, 82, 179, 0) 60%), #ffffff;
+        }
+        
+        .slide {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 3rem 4rem;
+            flex-direction: column;
+            justify-content: flex-start;
+            z-index: 100;
+        }
+        
+        .slide.active {
+            display: flex;
+            z-index: 200;
+        }
+
+        .slide-header {
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .slide-body {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            color: #343a40;
+        }
+        
+        .component-demo {
+            background-color: #ffffff;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            position: relative;
+        }
+        
+        .component-demo:hover {
+            border-color: #6f42c1;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .click-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: #adb5bd;
+            transition: all 0.3s ease;
+            z-index: 300;
+            cursor: pointer;
+        }
+
+        .component-demo:hover .click-icon {
+            color: #6f42c1;
+            transform: scale(1.2);
+        }
+
+        .concept-box, .info-card {
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+
+        .concept-box {
+            border-top: 5px solid #6f42c1;
+        }
+        
+        .slide-counter, .nav-button, .progress-bar-container {
+            position: fixed;
+            z-index: 1030;
+        }
+
+        .slide-counter {
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar-container {
+            top: 0; left: 0;
+            height: 4px; width: 100%;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #3b82f6);
+            transition: width 0.3s ease;
+        }
+        
+        .modal-body pre { border-radius: 0.5rem; }
+
+        .concept-text {
+            font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+            line-height: 1.6;
+        }
+        .concept-text code {
+            font-size: clamp(1rem, 2.2vw, 1.5rem);
+            padding: 0.3em 0.6em !important;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animatable { opacity: 0; }
+        .fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <div class="slide active justify-content-center">
+        <div class="slide-content text-center">
+            <div class="mb-4" style="animation: float 3s ease-in-out infinite;">
+                <i class="bi bi-layout-sidebar-inset" style="font-size: 8rem; color: #7952b3; text-shadow: 0 0 30px rgba(121, 82, 179, 0.5);"></i>
+            </div>
+            <h1 class="mb-3 display-1 fw-bolder animatable fade-in-up" style="color: #563d7c; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Dominando o Offcanvas</h1>
+            <p class="mb-4 display-5 fw-light animatable fade-in-up delay-1" style="color: #6f42c1;">O Guia Completo com Bootstrap 5</p>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-layout-sidebar-inset me-3"></i>O que é um Offcanvas?</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">Um painel lateral (sidebar) que desliza sobre o conteúdo da página.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-bullseye me-2"></i>Propósito</h4>
+                        <p class="concept-text">Perfeito para navegação oculta (menu mobile), carrinhos de compra, filtros de busca ou menus de configurações.</p>
+                        <hr class="my-5">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-toggles me-2"></i>Como funciona?</h4>
+                        <p class="concept-text">É acionado por um botão (<code class="bg-light p-2 rounded">data-bs-toggle="offcanvas"</code>) e requer o JavaScript do Bootstrap para funcionar.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title animatable">Anatomia do Offcanvas</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <p class="fs-3 fw-light text-secondary mb-5 animatable">Um Offcanvas é composto por 3 partes principais.</p>
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-hand-index-thumb fs-1 text-primary"></i>
+                                <h4 class="fw-bold my-3">O Acionador (Botão)</h4>
+                                <p class="text-muted">Um <code>&lt;button&gt;</code> ou <code>&lt;a&gt;</code> com <code>data-bs-toggle="offcanvas"</code> e <code>data-bs-target="#ID"</code>.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-box fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">O Contêiner (<code>.offcanvas</code>)</h4>
+                                <p class="text-muted">A <code>&lt;div&gt;</code> principal que fica oculta e possui o <code>id</code> referenciado pelo botão.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-justify-left fs-1 text-info"></i>
+                                <h4 class="fw-bold my-3">Conteúdo Interno</h4>
+                                <p class="text-muted"><code>.offcanvas-header</code> (com título e <code>.btn-close</code>) e <code>.offcanvas-body</code> para seu conteúdo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Offcanvas Básico</h2></div>
+            <div class="slide-body">
+                <div class="container animatable text-center">
+                    <div class="p-5 rounded-4 component-demo d-flex justify-content-center align-items-center">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-basic"></i>
+                        <button class="btn btn-primary btn-lg" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDemoBasic">
+                          Abrir Offcanvas (Esquerda)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Posicionamento</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-5 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-positioning"></i>
+                        <p class="text-center fs-5 mb-4">Use <code>.offcanvas-start</code> (padrão), <code>.offcanvas-end</code>, <code>.offcanvas-top</code>, ou <code>.offcanvas-bottom</code>.</p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDemoEnd">
+                              Direita (.offcanvas-end)
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDemoTop">
+                              Topo (.offcanvas-top)
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDemoBottom">
+                              Inferior (.offcanvas-bottom)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo: Comportamento do Fundo</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-5 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-backdrop"></i>
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBackdrop">
+                              Backdrop Padrão (clique fora para fechar)
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStatic" data-bs-backdrop="static">
+                              Backdrop Estático (não fecha ao clicar)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <div class="slide-content">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Resumo: Offcanvas</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-primary-subtle border-primary-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-primary-emphasis">Acionador</h3>
+                                <p>Use <code class="bg-white p-1 rounded">data-bs-toggle="offcanvas"</code> e <code class="bg-white p-1 rounded">data-bs-target="#ID"</code>.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-info-subtle border-info-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-info-emphasis">Posição</h3>
+                                <p>Classes no <code>.offcanvas</code>: <code>.offcanvas-start</code>, <code>.offcanvas-end</code>, <code>.offcanvas-top</code>, <code>.offcanvas-bottom</code>.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-success-subtle border-success-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-success-emphasis">Comportamento</h3>
+                                <p>Controle com atributos <code>data-bs-backdrop</code> e <code>data-bs-scroll</code> no botão acionador.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasDemoBasic">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Offcanvas Básico</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <p>Este é o conteúdo do offcanvas padrão (da esquerda).</p>
+      </div>
+    </div>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasDemoEnd">
+      <div class="offcanvas-header"><h5 class="offcanvas-title">Direita</h5><button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button></div>
+      <div class="offcanvas-body"><p>Offcanvas da Direita (<code>.offcanvas-end</code>)</p></div>
+    </div>
+    <div class="offcanvas offcanvas-top" tabindex="-1" id="offcanvasDemoTop">
+      <div class="offcanvas-header"><h5 class="offcanvas-title">Topo</h5><button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button></div>
+      <div class="offcanvas-body"><p>Offcanvas do Topo (<code>.offcanvas-top</code>)</p></div>
+    </div>
+    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasDemoBottom">
+      <div class="offcanvas-header"><h5 class="offcanvas-title">Inferior</h5><button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button></div>
+      <div class="offcanvas-body"><p>Offcanvas Inferior (<code>.offcanvas-bottom</code>)</p></div>
+    </div>
+    
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasBackdrop">
+      <div class="offcanvas-header"><h5 class="offcanvas-title">Backdrop Padrão</h5><button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button></div>
+      <div class="offcanvas-body"><p>Você pode clicar fora de mim para me fechar.</p></div>
+    </div>
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasStatic" data-bs-backdrop="static">
+      <div class="offcanvas-header"><h5 class="offcanvas-title">Backdrop Estático</h5><button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button></div>
+      <div class="offcanvas-body"><p>Você <strong>não</strong> pode clicar fora de mim para me fechar. Use o botão.</p></div>
+    </div>
+
+    <div class="modal fade" id="modal-code-basic" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Offcanvas Básico</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- 1. O Botão Acionador --&gt;
+&lt;button class="btn btn-primary" type="button" 
+        data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample"&gt;
+  Abrir Offcanvas
+&lt;/button&gt;
+
+&lt;!-- 2. A Estrutura do Offcanvas --&gt;
+&lt;div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample"&gt;
+  &lt;div class="offcanvas-header"&gt;
+    &lt;h5 class="offcanvas-title"&gt;Título do Offcanvas&lt;/h5&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="offcanvas"&gt;&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="offcanvas-body"&gt;
+    &lt;p&gt;Este é o conteúdo do offcanvas.&lt;/p&gt;
+    &lt;a href="#" class="btn btn-primary"&gt;Um Link&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    
+    <div class="modal fade" id="modal-code-positioning" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Posicionamento</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Botão para Offcanvas da Direita --&gt;
+&lt;button class="btn btn-secondary" type="button" 
+        data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd"&gt;
+  Direita
+&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-end" id="offcanvasEnd"&gt;...&lt;/div&gt;
+
+
+&lt;!-- Botão para Offcanvas do Topo --&gt;
+&lt;button class="btn btn-secondary" type="button" 
+        data-bs-toggle="offcanvas" data-bs-target="#offcanvasTop"&gt;
+  Topo
+&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-top" id="offcanvasTop"&gt;...&lt;/div&gt;
+
+
+&lt;!-- Botão para Offcanvas Inferior --&gt;
+&lt;button class="btn btn-secondary" type="button" 
+        data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottom"&gt;
+  Inferior
+&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-bottom" id="offcanvasBottom"&gt;...&lt;/div&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-backdrop" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Comportamento do Fundo</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Padrão (com backdrop, fecha ao clicar fora) --&gt;
+&lt;button class="btn btn-secondary" type="button" 
+        data-bs-toggle="offcanvas" data-bs-target="#offcanvasDefault"&gt;
+  Backdrop Padrão
+&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-start" id="offcanvasDefault"&gt;...&lt;/div&gt;
+
+
+&lt;!-- Backdrop Estático (não fecha ao clicar fora) --&gt;
+&lt;button class="btn btn-secondary" type="button" 
+        data-bs-toggle="offcanvas" data-bs-target="#offcanvasStatic" 
+        data-bs-backdrop="static"&gt;
+  Backdrop Estático
+&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-start" id="offcanvasStatic" data-bs-backdrop="static"&gt;...&lt;/div&gt;</code></pre></div></div></div></div>
+
+    
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="slide-counter"><i class="bi bi-display me-2"></i><span id="currentSlide">1</span> / <span id="totalSlides"></span></div>
+    <div class="position-fixed top-50 start-0 translate-middle-y z-3 ms-4"><button onclick="previousSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-left fs-5 lh-1"></i></button></div>
+    <div class="position-fixed top-50 end-0 translate-middle-y z-3 me-4"><button onclick="nextSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-right fs-5 lh-1"></i></button></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        function updateProgress() {
+            const progress = ((currentSlideIndex + 1) / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+        }
+        
+        function showSlide(index) {
+            const animatableElements = document.querySelectorAll('.animatable');
+            animatableElements.forEach(el => {
+                el.classList.remove('fade-in-up');
+            });
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            const activeSlide = slides[index];
+            activeSlide.classList.add('active');
+            
+            const elementsToAnimate = activeSlide.querySelectorAll('.animatable');
+            elementsToAnimate.forEach(el => {
+                el.style.animation = 'none';
+                el.offsetHeight;
+                el.style.animation = null; 
+                el.classList.add('fade-in-up');
+            });
+            
+            document.getElementById('currentSlide').textContent = index + 1;
+            updateProgress();
+        }
+        
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        function previousSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                event.preventDefault();
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                previousSlide();
+            }
+        });
+        
+        window.addEventListener('load', () => {
+            showSlide(currentSlideIndex);
+        });
+    </script>
+</body>
+</html>
