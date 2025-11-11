@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Bootstrap - Carrossel</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Impede qualquer scroll ou vazamento */
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, rgba(121, 82, 179, 0.2) 0%, rgba(121, 82, 179, 0) 60%), #ffffff;
+        }
+
+        /* O "Palco" onde os slides são injetados */
+        #slide-container {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 100;
+        }
+        
+        /* A estrutura interna de CADA slide */
+        .slide {
+            height: 100%;
+            width: 100%;
+            padding: 3rem 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            animation: fadeIn 0.5s ease-in-out; /* Animação suave de entrada */
+        }
+
+        .slide-header {
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .slide-body {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            color: #343a40;
+        }
+        
+        .component-demo {
+            background-color: #ffffff;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            position: relative;
+        }
+        
+        .component-demo:hover {
+            border-color: #6f42c1;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .click-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: #adb5bd;
+            transition: all 0.3s ease;
+            z-index: 300;
+            cursor: pointer;
+        }
+
+        .component-demo:hover .click-icon {
+            color: #6f42c1;
+            transform: scale(1.2);
+        }
+
+        .concept-box, .info-card {
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+
+        .concept-box {
+            border-top: 5px solid #6f42c1;
+        }
+        
+        /* Controles Ficam Fora do 'palco' */
+        .slide-counter, .nav-button, .progress-bar-container {
+            position: fixed;
+            z-index: 1030; 
+        }
+
+        .slide-counter {
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .carousel-indicators [data-bs-target] {
+            background-color: black;
+        }
+        .progress-bar-container {
+            top: 0; left: 0;
+            height: 4px; width: 100%;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #3b82f6);
+            transition: width 0.3s ease;
+        }
+        
+        .modal-body pre { border-radius: 0.5rem; }
+
+        .concept-text {
+            font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+            line-height: 1.6;
+        }
+        .concept-text code {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            padding: 0.3em 0.6em !important;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animatable {
+            opacity: 0;
+            animation: fadeInUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+
+        .svg-placeholder-text {
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            font-size: 2rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <main id="slide-container"></main>
+
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="slide-counter"><i class="bi bi-display me-2"></i><span id="currentSlide">1</span> / <span id="totalSlides"></span></div>
+    <div class="position-fixed top-50 start-0 translate-middle-y z-3 ms-4"><button onclick="previousSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-left fs-5 lh-1"></i></button></div>
+    <div class="position-fixed top-50 end-0 translate-middle-y z-3 me-4"><button onclick="nextSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-right fs-5 lh-1"></i></button></div>
+
+    <div class="modal fade" id="modal-code-basic" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Carrossel Básico (Só Slides)</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- data-bs-ride="carousel" inicia o autoplay --&gt;
+&lt;div id="carouselDemoBasic" class="carousel slide" data-bs-ride="carousel"&gt;
+  &lt;div class="carousel-inner"&gt;
+    &lt;div class="carousel-item active"&gt;
+      &lt;img src="imagem1.jpg" class="d-block w-100" alt="Slide 1"&gt;
+    &lt;/div&gt;
+    &lt;div class="carousel-item"&gt;
+      &lt;img src="imagem2.jpg" class="d-block w-100" alt="Slide 2"&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-controls" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Carrossel com Controles</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;div id="carouselDemoControls" class="carousel slide"&gt;
+  &lt;div class="carousel-inner"&gt;
+    &lt;div class="carousel-item active"&gt; &lt;img ...&gt; &lt;/div&gt;
+    &lt;div class="carousel-item"&gt; &lt;img ...&gt; &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- Botões de Controle --&gt;
+  &lt;button class="carousel-control-prev" type="button" data-bs-target="#carouselDemoControls" data-bs-slide="prev"&gt;
+    &lt;span class="carousel-control-prev-icon" aria-hidden="true"&gt;&lt;/span&gt;
+    &lt;span class="visually-hidden"&gt;Anterior&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;button class="carousel-control-next" type="button" data-bs-target="#carouselDemoControls" data-bs-slide="next"&gt;
+    &lt;span class="carousel-control-next-icon" aria-hidden="true"&gt;&lt;/span&gt;
+    &lt;span class="visually-hidden"&gt;Próximo&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-indicators" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Carrossel com Indicadores</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;div id="carouselDemoIndicators" class="carousel slide"&gt;
+  &lt;!-- Indicadores (Bolinhas) --&gt;
+  &lt;div class="carousel-indicators"&gt;
+    &lt;button type="button" data-bs-target="#carouselDemoIndicators" data-bs-slide-to="0" class="active"&gt;&lt;/button&gt;
+    &lt;button type="button" data-bs-target="#carouselDemoIndicators" data-bs-slide-to="1"&gt;&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="carousel-inner"&gt;
+    &lt;div class="carousel-item active"&gt; &lt;img ...&gt; &lt;/div&gt;
+    &lt;div class="carousel-item"&gt; &lt;img ...&gt; &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-captions" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Carrossel com Legendas</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;div class="carousel-item active"&gt;
+  &lt;img src="imagem1.jpg" class="d-block w-100" alt="..."&gt;
+  
+  &lt;!-- Legenda --&gt;
+  &lt;div class="carousel-caption d-none d-md-block"&gt;
+    &lt;h5&gt;Título do Primeiro Slide&lt;/h5&gt;
+    &lt;p&gt;Algum texto representativo para a legenda.&lt;/p&gt;
+  &lt;/div&gt;
+  
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-effects" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Efeitos Fade e Dark</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Efeito Fade (transição suave) --&gt;
+&lt;div class="carousel slide carousel-fade" data-bs-ride="carousel"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- Tema Escuro (para setas e indicadores) --&gt;
+&lt;!-- Ideal para usar com imagens de fundo claras --&gt;
+&lt;div class="carousel slide carousel-dark" data-bs-ride="carousel"&gt;
+  ...
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-attributes" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Data Attributes</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Este carrossel gira a cada 1 segundo (1000ms) --&gt;
+&lt;!-- E NÃO pausa quando o mouse está sobre ele --&gt;
+&lt;div class="carousel slide" 
+     data-bs-ride="carousel" 
+     data-bs-interval="1000" 
+     data-bs-pause="false"&gt;
+  ...
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-js" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Controle via JavaScript</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- 1. O HTML (sem data-bs-ride) --&gt;
+&lt;div id="meuCarrossel" class="carousel slide"&gt;
+  ... (slides aqui) ...
+&lt;/div&gt;
+
+&lt;!-- Botões de controle externos --&gt;
+&lt;button id="btn-prev"&gt;Anterior&lt;/button&gt;
+&lt;button id="btn-next"&gt;Próximo&lt;/button&gt;
+&lt;button id="btn-slide-2"&gt;Ir para Slide 2&lt;/button&gt;
+&lt;button id="btn-pause"&gt;Pausar&lt;/button&gt;</code></pre><hr><pre><code class="language-javascript">// 2. O JavaScript (no final da sua página)
+
+// Pega a instância do carrossel
+const meuCarrosselEl = document.getElementById('meuCarrossel');
+const meuCarrossel = new bootstrap.Carousel(meuCarrosselEl);
+
+// Adiciona eventos aos botões
+document.getElementById('btn-prev').addEventListener('click', () =&gt; {
+  meuCarrossel.prev(); // Move para o anterior
+});
+
+document.getElementById('btn-next').addEventListener('click', () =&gt; {
+  meuCarrossel.next(); // Move para o próximo
+});
+
+document.getElementById('btn-pause').addEventListener('click', () =&gt; {
+  meuCarrossel.pause(); // Pausa o autoplay
+});
+
+document.getElementById('btn-slide-2').addEventListener('click', () =&gt; {
+  meuCarrossel.to(1); // Vai para o slide 2 (índice 1)
+});</code></pre></div></div></div></div>
+
+    
+    <template id="slide-1">
+        <div class="slide justify-content-center">
+            <div class="slide-content text-center">
+                <div class="mb-4" style="animation: float 3s ease-in-out infinite;">
+                    <i class="bi bi-images" style="font-size: 8rem; color: #7952b3; text-shadow: 0 0 30px rgba(121, 82, 179, 0.5);"></i>
+                </div>
+                <h1 class="mb-3 display-1 fw-bolder animatable fade-in-up" style="color: #563d7c; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Dominando o Carrossel</h1>
+                <p class="mb-4 display-5 fw-light animatable fade-in-up delay-1" style="color: #6f42c1;">O Guia Completo com Bootstrap 5</p>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-2">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-images me-3"></i>O que é um Carrossel?</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">Um componente de slideshow para exibir uma série de conteúdos, como imagens ou texto.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-bullseye me-2"></i>Propósito</h4>
+                        <p class="concept-text">Perfeito para banners de marketing, portfólios de projetos, galerias de imagens e destaques de notícias.</p>
+                        <hr class="my-5">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-toggles me-2"></i>Como funciona?</h4>
+                        <p class="concept-text">É um componente complexo que depende do JavaScript do Bootstrap para controlar a transição dos slides.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-3">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable">Anatomia do Carrossel</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <p class="fs-3 fw-light text-secondary mb-5 animatable">Um carrossel é composto por várias partes.</p>
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-box fs-1 text-primary"></i>
+                                <h4 class="fw-bold my-3">Itens (<code>.carousel-item</code>)</h4>
+                                <p class="text-muted">Cada slide individual. Um deles **DEVE** ter a classe <code>.active</code> para ser o ponto de partida.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-chevron-left fs-1 text-success"></i> <i class="bi bi-chevron-right fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">Controles (Setas)</h4>
+                                <p class="text-muted">Os botões de "Anterior" e "Próximo" (<code>.carousel-control-prev/next</code>).</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-dot fs-1 text-info"></i><i class="bi bi-dot fs-1 text-info"></i><i class="bi bi-dot fs-1 text-info"></i>
+                                <h4 class="fw-bold my-3">Indicadores (Bolinhas)</h4>
+                                <p class="text-muted">A lista de "bolinhas" na parte inferior (<code>.carousel-indicators</code>) que mostra a posição atual.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-4">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 1: Somente Slides</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">A forma mais simples, usando <code>data-bs-ride="carousel"</code> para autoplay.</p>
+                    <div class="p-4 rounded-4 component-demo" style="background-color: #f0f0f0;">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-basic"></i>
+                        <div id="carouselDemoBasic" class="carousel slide" data-bs-ride="carousel">
+                          <div class="carousel-inner">
+                            <div class="carousel-item active">
+                              <svg class="d-block w-100" height="400" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#7952b3"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Slide 1</text>
+                              </svg>
+                            </div>
+                            <div class="carousel-item">
+                              <svg class="d-block w-100" height="400" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#563d7c"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Slide 2</text>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-5">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 2: Adicionando Controles (Setas)</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-4 rounded-4 component-demo" style="background-color: #f0f0f0;">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-controls"></i>
+                        <div id="carouselDemoControls" class="carousel slide">
+                          <div class="carousel-inner">
+                            <div class="carousel-item active">
+                              <svg class="d-block w-100" height="400" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#198754"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Primeiro Slide</text>
+                              </svg>
+                            </div>
+                            <div class="carousel-item">
+                              <svg class="d-block w-100" height="400" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#20c997"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Segundo Slide</text>
+                              </svg>
+                            </div>
+                          </div>
+                          <button class="carousel-control-prev" type="button" data-bs-target="#carouselDemoControls" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                          </button>
+                          <button class="carousel-control-next" type="button" data-bs-target="#carouselDemoControls" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Próximo</span>
+                          </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-6">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 3: Adicionando Indicadores</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-4 rounded-4 component-demo" style="background-color: #f0f0f0;">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-indicators"></i>
+                        <div id="carouselDemoIndicators" class="carousel slide">
+                          <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#carouselDemoIndicators" data-bs-slide-to="0" class="active"></button>
+                            <button type="button" data-bs-target="#carouselDemoIndicators" data-bs-slide-to="1"></button>
+                          </div>
+                          <div class="carousel-inner">
+                            <div class="carousel-item active">
+                              <svg class="d-block w-100" height="400" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#0d6efd"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Slide 1</text>
+                              </svg>
+                            </div>
+                            <div class="carousel-item">
+                              <svg class="d-block w-100" height="400" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#0a58ca"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Slide 2</text>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-7">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 4: Adicionando Legendas (Captions)</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <div class="p-4 rounded-4 component-demo" style="background-color: #f0f0f0;">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-captions"></i>
+                        <div id="carouselDemoCaptions" class="carousel slide" data-bs-ride="carousel">
+                          <div class="carousel-inner">
+                            <div class="carousel-item active">
+                              <svg class="d-block w-100" height="400" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#343a40"></rect>
+                              </svg>
+                              <div class="carousel-caption d-none d-md-block">
+                                <h5>Título do Primeiro Slide</h5>
+                                <p>Algum texto representativo para a legenda.</p>
+                              </div>
+                            </div>
+                            <div class="carousel-item">
+                              <svg class="d-block w-100" height="400" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#212529"></rect>
+                              </svg>
+                              <div class="carousel-caption d-none d-md-block">
+                                <h5>Título do Segundo Slide</h5>
+                                <p>Outra legenda interessante.</p>
+                              </div>
+                            </div>
+                          </div>
+                          <button class="carousel-control-prev" type="button" data-bs-target="#carouselDemoCaptions" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                          <button class="carousel-control-next" type="button" data-bs-target="#carouselDemoCaptions" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-8">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 5: Efeitos (Fade e Dark)</h2></div>
+            <div class="slide-body">
+                <div class="container">
+                    <div class="row gy-5">
+                        <div class="col-lg-6 animatable delay-1">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Efeito Fade (<code>.carousel-fade</code>)</h3>
+                            <div class="p-4 rounded-4 component-demo">
+                                <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-effects"></i>
+                                <div id="carouselDemoFade" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                                  <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                      <svg class="d-block w-100" height="300" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                        <rect width="100%" height="100%" fill="#dc3545"></rect>
+                                        <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Fade 1</text>
+                                      </svg>
+                                    </div>
+                                    <div class="carousel-item">
+                                      <svg class="d-block w-100" height="300" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                        <rect width="100%" height="100%" fill="#ffc107"></rect>
+                                        <text x="50%" y="50%" fill="#000" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Fade 2</text>
+                                      </svg>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 animatable delay-2">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Tema Escuro (<code>.carousel-dark</code>)</h3>
+                            <div class="p-4 rounded-4 component-demo">
+                                <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-effects"></i>
+                                <div id="carouselDemoDark" class="carousel carousel-dark slide" data-bs-ride="carousel">
+                                  <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                      <svg class="d-block w-100" height="300" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                        <rect width="100%" height="100%" fill="#e9ecef"></rect>
+                                        <text x="50%" y="50%" fill="#000" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Dark 1</text>
+                                      </svg>
+                                    </div>
+                                    <div class="carousel-item">
+                                      <svg class="d-block w-100" height="300" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                        <rect width="100%" height="100%" fill="#f8f9fa"></rect>
+                                        <text x="50%" y="50%" fill="#000" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Dark 2</text>
+                                      </svg>
+                                    </div>
+                                  </div>
+                                  <button class="carousel-control-prev" type="button" data-bs-target="#carouselDemoDark" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                                  <button class="carousel-control-next" type="button" data-bs-target="#carouselDemoDark" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-9">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-sliders me-3"></i>Controle Avançado (Data Attributes)</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">Controle o carrossel via atributos <code>data-bs-*</code> no elemento <code>.carousel</code>.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box">
+                        <div class="row">
+                            <div class="col-md-6 text-start">
+                                <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-play-circle me-2"></i>Autoplay</h4>
+                                <p class="concept-text"><code class="bg-light p-2 rounded">data-bs-ride="carousel"</code></p>
+                                <hr class="my-4">
+                                <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-clock-history me-2"></i>Intervalo</h4>
+                                <p class="concept-text"><code class="bg-light p-2 rounded">data-bs-interval="1000"</code> (1 segundo)</p>
+                                <hr class="my-4">
+                                <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-pause-circle me-2"></i>Pausar ao Pousar</h4>
+                                <p class="concept-text"><code class="bg-light p-2 rounded">data-bs-pause="false"</code> (Não pausa)</p>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <div class="p-3 rounded-4 component-demo w-100">
+                                    <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-attributes"></i>
+                                    <div id="carouselDemoFast" class="carousel slide" data-bs-ride="carousel" data-bs-interval="1000" data-bs-pause="false">
+                                      <div class="carousel-inner">
+                                        <div class="carousel-item active">
+                                          <svg class="d-block w-100" height="200" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                            <rect width="100%" height="100%" fill="#6f42c1"></rect>
+                                            <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Rápido (1s)</text>
+                                          </svg>
+                                        </div>
+                                        <div class="carousel-item">
+                                          <svg class="d-block w-100" height="200" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                            <rect width="100%" height="100%" fill="#563d7c"></rect>
+                                            <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Não Pausa</text>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-10">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-code-slash me-3"></i>Controle via JavaScript</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">Você pode controlar o carrossel manualmente usando JavaScript.</p>
+                    <div class="p-5 rounded-4 shadow-sm component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-js"></i>
+                        <div id="jsCarouselDemo" class="carousel slide">
+                          <div class="carousel-inner">
+                            <div class="carousel-item active">
+                              <svg class="d-block w-100" height="300" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#0d6efd"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Slide JS 1</text>
+                              </svg>
+                            </div>
+                            <div class="carousel-item">
+                              <svg class="d-block w-100" height="300" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#0a58ca"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text">Slide JS 2</text>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="mt-4">
+                            <button class="btn btn-primary" id="js-carousel-prev">Anterior</button>
+                            <button class="btn btn-primary" id="js-carousel-next">Próximo</button>
+                            <button class="btn btn-primary" id="js-carousel-slide-2">Ir para Slide 2</button>
+                            <button class="btn btn-warning" id="js-carousel-pause">Pausar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-11">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable">Carrosséis no Mundo Real</h2></div>
+            <div class="slide-body">
+                <div class="container">
+                    <p class="fs-3 fw-light text-secondary mb-5 text-center animatable">Inspiração de grandes sites que usam carrosséis de forma eficaz.</p>
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="card h-100 shadow-sm info-card">
+                              <svg class="card-img-top" height="200" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#563d7c"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text" style="font-size: 1.5rem">E-commerce: Lista de Cursos</text>
+                              </svg>
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">E-commerce (ex: Udemy)</h5>
+                                    <p class="card-text">Perfeito para exibir "listas de produtos" ou "cursos recomendados" em um espaço compacto, permitindo que o usuário deslize para ver mais.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="card h-100 shadow-sm info-card">
+                              <svg class="card-img-top" height="200" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#dc3545"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text" style="font-size: 1.5rem">Airbnb: Galeria de Fotos</text>
+                              </svg>
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">Galerias (ex: Airbnb)</h5>
+                                    <p class="card-text">O uso mais comum. Ideal para galerias de fotos em páginas de produtos ou listagens, com indicadores e setas para navegação fácil.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="card h-100 shadow-sm info-card">
+                              <svg class="card-img-top" height="200" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#343a40"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text" style="font-size: 1.5rem">Portal de Notícias</text>
+                              </svg>
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">Portais (ex: Notícias)</h5>
+                                    <p class="card-text">Usado para destacar as "manchetes principais" na home page, com legendas (captions) e autoplay para rotacionar as notícias.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-12">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable">Boas Práticas com Carrossel</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-image-fill fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">Otimize Imagens</h4>
+                                <p class="text-muted">Carrosséis são pesados. Comprima suas imagens (use formatos .webp) para garantir um carregamento rápido.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-universal-access fs-1 text-info"></i>
+                                <h4 class="fw-bold my-3">Acessibilidade é Chave</h4>
+                                <p class="text-muted">Forneça textos alternativos (<code>alt</code>) para as imagens e use <code>.carousel-caption</code> para descrições claras.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-hand-index-thumb fs-1 text-danger"></i>
+                                <h4 class="fw-bold my-3">Não Irite o Usuário</h4>
+                                <p class="text-muted">Evite autoplay muito rápido. Não coloque informações cruciais *apenas* no carrossel, pois o usuário pode não ver.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-13">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Resumo: Carrossel</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-primary-subtle border-primary-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-primary-emphasis">Estrutura</h3>
+                                <p><code>.carousel-inner</code> > <code>.carousel-item</code> (um <code>.active</code>).</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-success-subtle border-success-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-success-emphasis">Navegação</h3>
+                                <p><code>.carousel-control-prev/next</code> (setas) e <code>.carousel-indicators</code> (bolinhas).</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-info-subtle border-info-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-info-emphasis">Conteúdo</h3>
+                                <p><code>.carousel-caption</code> para adicionar texto sobre as imagens.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <div class="modal fade" id="modal-code-basic" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Carrossel Básico (Só Slides)</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- data-bs-ride="carousel" inicia o autoplay --&gt;
+&lt;div id="carouselDemoBasic" class="carousel slide" data-bs-ride="carousel"&gt;
+  &lt;div class="carousel-inner"&gt;
+    &lt;div class="carousel-item active"&gt;
+      &lt;img src="..." class="d-block w-100" alt="Slide 1"&gt;
+    &lt;/div&gt;
+    &lt;div class="carousel-item"&gt;
+      &lt;img src="..." class="d-block w-100" alt="Slide 2"&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-controls" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Carrossel com Controles</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;div id="carouselDemoControls" class="carousel slide"&gt;
+  &lt;div class="carousel-inner"&gt;
+    &lt;div class="carousel-item active"&gt; &lt;img ...&gt; &lt;/div&gt;
+    &lt;div class="carousel-item"&gt; &lt;img ...&gt; &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- Botões de Controle --&gt;
+  &lt;button class="carousel-control-prev" type="button" data-bs-target="#carouselDemoControls" data-bs-slide="prev"&gt;
+    &lt;span class="carousel-control-prev-icon" aria-hidden="true"&gt;&lt;/span&gt;
+    &lt;span class="visually-hidden"&gt;Anterior&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;button class="carousel-control-next" type="button" data-bs-target="#carouselDemoControls" data-bs-slide="next"&gt;
+    &lt;span class="carousel-control-next-icon" aria-hidden="true"&gt;&lt;/span&gt;
+    &lt;span class="visually-hidden"&gt;Próximo&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-indicators" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Carrossel com Indicadores</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;div id="carouselDemoIndicators" class="carousel slide"&gt;
+  &lt;!-- Indicadores (Bolinhas) --&gt;
+  &lt;div class="carousel-indicators"&gt;
+    &lt;button type="button" data-bs-target="#carouselDemoIndicators" data-bs-slide-to="0" class="active"&gt;&lt;/button&gt;
+    &lt;button type="button" data-bs-target="#carouselDemoIndicators" data-bs-slide-to="1"&gt;&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="carousel-inner"&gt;
+    &lt;div class="carousel-item active"&gt; &lt;img ...&gt; &lt;/div&gt;
+    &lt;div class="carousel-item"&gt; &lt;img ...&gt; &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-captions" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Carrossel com Legendas</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;div class="carousel-item active"&gt;
+  &lt;img src="imagem1.jpg" class="d-block w-100" alt="..."&gt;
+  
+  &lt;!-- Legenda --&gt;
+  &lt;div class="carousel-caption d-none d-md-block"&gt;
+    &lt;h5&gt;Título do Primeiro Slide&lt;/h5&gt;
+    &lt;p&gt;Algum texto representativo para a legenda.&lt;/p&gt;
+  &lt;/div&gt;
+  
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-effects" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Efeitos Fade e Dark</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Efeito Fade (transição suave) --&gt;
+&lt;div class="carousel slide carousel-fade" data-bs-ride="carousel"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- Tema Escuro (para setas e indicadores) --&gt;
+&lt;!-- Ideal para usar com imagens de fundo claras --&gt;
+&lt;div class="carousel slide carousel-dark" data-bs-ride="carousel"&gt;
+  ...
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-attributes" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Data Attributes</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Este carrossel gira a cada 1 segundo (1000ms) --&gt;
+&lt;!-- E NÃO pausa quando o mouse está sobre ele --&gt;
+&lt;div class="carousel slide" 
+     data-bs-ride="carousel" 
+     data-bs-interval="1000" 
+     data-bs-pause="false"&gt;
+  ...
+&lt;/div&gt;</code></pre></div></div></div></div>
+    <div class="modal fade" id="modal-code-js" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Controle via JavaScript</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- 1. O HTML (sem data-bs-ride) --&gt;
+&lt;div id="meuCarrossel" class="carousel slide"&gt;
+  ... (slides aqui) ...
+&lt;/div&gt;
+
+&lt;!-- Botões de controle externos --&gt;
+&lt;button id="btn-prev"&gt;Anterior&lt;/button&gt;
+&lt;button id="btn-next"&gt;Próximo&lt;/button&gt;
+&lt;button id="btn-slide-2"&gt;Ir para Slide 2&lt;/button&gt;
+&lt;button id="btn-pause"&gt;Pausar&lt;/button&gt;</code></pre><hr><pre><code class="language-javascript">// 2. O JavaScript (no final da sua página)
+
+// Pega a instância do carrossel
+const meuCarrosselEl = document.getElementById('meuCarrossel');
+const meuCarrossel = new bootstrap.Carousel(meuCarrosselEl);
+
+// Adiciona eventos aos botões
+document.getElementById('btn-prev').addEventListener('click', () =&gt; {
+  meuCarrossel.prev(); // Move para o anterior
+});
+
+document.getElementById('btn-next').addEventListener('click', () =&gt; {
+  meuCarrossel.next(); // Move para o próximo
+});
+
+document.getElementById('btn-pause').addEventListener('click', () =&gt; {
+  meuCarrossel.pause(); // Pausa o autoplay
+});
+
+document.getElementById('btn-slide-2').addEventListener('click', () =&gt; {
+  meuCarrossel.to(1); // Vai para o slide 2 (índice 1)
+});</code></pre></div></div></div></div>
+
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="slide-counter"><i class="bi bi-display me-2"></i><span id="currentSlide">1</span> / <span id="totalSlides"></span></div>
+    <div class="position-fixed top-50 start-0 translate-middle-y z-3 ms-4"><button onclick="previousSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-left fs-5 lh-1"></i></button></div>
+    <div class="position-fixed top-50 end-0 translate-middle-y z-3 me-4"><button onclick="nextSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-right fs-5 lh-1"></i></button></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        const slideContainer = document.getElementById('slide-container');
+        const slideTemplates = [
+            'slide-1', 'slide-2', 'slide-3', 'slide-4', 'slide-5', 'slide-6',
+            'slide-7', 'slide-8', 'slide-9', 'slide-10', 'slide-11', 'slide-12', 'slide-13'
+        ];
+        const totalSlides = slideTemplates.length;
+        let currentSlideIndex = 0;
+
+        const progressBar = document.getElementById('progressBar');
+        const counter = document.getElementById('currentSlide');
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        // --- FUNÇÕES GLOBAIS DE NAVEGAÇÃO ---
+        function updateProgress(index) {
+            const progress = ((index + 1) / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+        }
+        
+        function animateSlide(slideElement) {
+            const elementsToAnimate = slideElement.querySelectorAll('.animatable');
+            elementsToAnimate.forEach(el => {
+                el.classList.add('fade-in-up');
+            });
+        }
+        
+        function showSlide(index) {
+            // 1. Pega o ID do template
+            const templateId = slideTemplates[index];
+            const template = document.getElementById(templateId);
+            
+            // 2. Injeta o HTML no "palco"
+            slideContainer.innerHTML = template.innerHTML;
+
+            // 3. ATIVA carrosséis e animações
+            // Pega o elemento .slide que ACABOU de ser injetado
+            const activeSlideElement = slideContainer.firstElementChild;
+            
+            // Ativa animações
+            animateSlide(activeSlideElement);
+            
+            // Inicializa carrosséis que estão no slide recém-injetado
+            const carouselsInActiveSlide = activeSlideElement.querySelectorAll('.carousel');
+            carouselsInActiveSlide.forEach(carouselEl => {
+                const carouselInstance = bootstrap.Carousel.getOrCreateInstance(carouselEl);
+                if (carouselEl.dataset.bsRide === 'carousel') {
+                    carouselInstance.cycle();
+                }
+            });
+
+            // Re-liga os controles JS do slide 10 (se for o slide 10)
+            if (templateId === 'slide-10') {
+                initializeJsCarousel(); 
+            }
+            
+            // 4. Atualiza o contador e a barra
+            counter.textContent = index + 1;
+            updateProgress(index);
+        }
+        
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        function previousSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+
+        // Função para inicializar o JS do slide 10
+        function initializeJsCarousel() {
+            const jsCarouselDemoEl = document.getElementById('jsCarouselDemo');
+            if (jsCarouselDemoEl) {
+                const jsCarouselInstance = new bootstrap.Carousel(jsCarouselDemoEl, {
+                  interval: false, 
+                  ride: false
+                });
+            
+                document.getElementById('js-carousel-prev')?.addEventListener('click', () => jsCarouselInstance.prev());
+                document.getElementById('js-carousel-next')?.addEventListener('click', () => jsCarouselInstance.next());
+                document.getElementById('js-carousel-slide-2')?.addEventListener('click', () => jsCarouselInstance.to(1));
+                document.getElementById('js-carousel-pause')?.addEventListener('click', () => jsCarouselInstance.pause());
+            }
+        }
+
+        // --- INICIALIZAÇÃO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Teclado
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'ArrowRight' || event.key === ' ') {
+                    event.preventDefault();
+                    nextSlide();
+                } else if (event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    previousSlide();
+                }
+            });
+
+            // Mostra o primeiro slide
+            showSlide(0);
+        });
+    </script>
+</body>
+</html>
