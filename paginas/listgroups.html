@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Bootstrap - Grupos de Lista</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, rgba(121, 82, 179, 0.2) 0%, rgba(121, 82, 179, 0) 60%), #ffffff;
+        }
+
+        #slide-container {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .slide {
+            height: 100vh;
+            width: 100vw;
+            padding: 3rem 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .slide-header {
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .slide-body {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            color: #343a40;
+        }
+        
+        .component-demo {
+            background-color: #ffffff;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            position: relative;
+        }
+        
+        .component-demo:hover {
+            border-color: #6f42c1;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .click-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: #adb5bd;
+            transition: all 0.3s ease;
+            z-index: 300;
+            cursor: pointer;
+        }
+
+        .component-demo:hover .click-icon {
+            color: #6f42c1;
+            transform: scale(1.2);
+        }
+
+        .concept-box, .info-card {
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+
+        .concept-box {
+            border-top: 5px solid #6f42c1;
+        }
+        
+        .slide-counter, .nav-button, .progress-bar-container {
+            position: fixed;
+            z-index: 1030; 
+        }
+
+        .slide-counter {
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar-container {
+            top: 0; left: 0;
+            height: 4px; width: 100%;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #3b82f6);
+            transition: width 0.3s ease;
+        }
+        
+        .modal-body pre { border-radius: 0.5rem; }
+
+        .concept-text {
+            font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+            line-height: 1.6;
+        }
+        .concept-text code {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            padding: 0.3em 0.6em !important;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animatable {
+            opacity: 0;
+            animation: fadeInUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+
+    <main id="slide-container"></main>
+
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="slide-counter"><i class="bi bi-display me-2"></i><span id="currentSlide">1</span> / <span id="totalSlides"></span></div>
+    <div class="position-fixed top-50 start-0 translate-middle-y z-3 ms-4"><button onclick="previousSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-left fs-5 lh-1"></i></button></div>
+    <div class="position-fixed top-50 end-0 translate-middle-y z-3 me-4"><button onclick="nextSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-right fs-5 lh-1"></i></button></div>
+
+    <div class="modal fade" id="modal-code-basic" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Grupo de Lista Básico</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;ul class="list-group"&gt;
+  &lt;li class="list-group-item"&gt;Um item&lt;/li&gt;
+  &lt;li class="list-group-item"&gt;Um segundo item&lt;/li&gt;
+  &lt;li class="list-group-item"&gt;Um terceiro item&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- Com estado .active --&gt;
+&lt;ul class="list-group mt-3"&gt;
+  &lt;li class="list-group-item active" aria-current="true"&gt;Um item ativo&lt;/li&gt;
+  &lt;li class="list-group-item"&gt;Um segundo item&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- Com estado .disabled --&gt;
+&lt;ul class="list-group mt-3"&gt;
+  &lt;li class="list-group-item disabled" aria-disabled="true"&gt;Um item desativado&lt;/li&gt;
+  &lt;li class="list-group-item"&gt;Um segundo item&lt;/li&gt;
+&lt;/ul&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-actions" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Links e Botões</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Use &lt;div&gt; como container e &lt;a&gt; ou &lt;button&gt; como itens --&gt;
+&lt;div class="list-group"&gt;
+  &lt;a href="#" class="list-group-item list-group-item-action active" aria-current="true"&gt;
+    Link ativo (com .list-group-item-action)
+  &lt;/a&gt;
+  &lt;a href="#" class="list-group-item list-group-item-action"&gt;Segundo link&lt;/a&gt;
+  &lt;button type="button" class="list-group-item list-group-item-action"&gt;
+    Um item de botão
+  &lt;/button&gt;
+  &lt;a href="#" class="list-group-item list-group-item-action disabled"&gt;
+    Link desativado
+  &lt;/a&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-badges-colors" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Badges e Cores</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Com Badges --&gt;
+&lt;ul class="list-group"&gt;
+  &lt;li class="list-group-item d-flex justify-content-between align-items-center"&gt;
+    Caixa de Entrada
+    &lt;span class="badge bg-primary rounded-pill"&gt;14&lt;/span&gt;
+  &lt;/li&gt;
+  &lt;li class="list-group-item d-flex justify-content-between align-items-center"&gt;
+    Spam
+    &lt;span class="badge bg-danger rounded-pill"&gt;2&lt;/span&gt;
+  &lt;/li&gt;
+  &lt;li class="list-group-item"&gt;Itens enviados&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- Com Cores Contextuais --&gt;
+&lt;ul class="list-group mt-4"&gt;
+  &lt;li class="list-group-item"&gt;Item padrão&lt;/li&gt;
+  &lt;li class="list-group-item list-group-item-primary"&gt;Item Primary&lt;/li&gt;
+  &lt;li class="list-group-item list-group-item-success"&gt;Item Success&lt;/li&gt;
+  &lt;li class="list-group-item list-group-item-warning"&gt;Item Warning&lt;/li&gt;
+  &lt;li class="list-group-item list-group-item-danger"&gt;Item Danger&lt;/li&gt;
+&lt;/ul&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-custom" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Conteúdo Customizado</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Use utilitários de Flexbox para layouts complexos --&gt;
+&lt;div class="list-group"&gt;
+  &lt;a href="#" class="list-group-item list-group-item-action active" aria-current="true"&gt;
+    &lt;div class="d-flex w-100 justify-content-between"&gt;
+      &lt;h5 class="mb-1"&gt;Título da lista&lt;/h5&gt;
+      &lt;small&gt;3 dias atrás&lt;/small&gt;
+    &lt;/div&gt;
+    &lt;p class="mb-1"&gt;Algum conteúdo de placeholder em um parágrafo.&lt;/p&gt;
+    &lt;small&gt;E um texto menor para rodapé.&lt;/small&gt;
+  &lt;/a&gt;
+  &lt;a href="#" class="list-group-item list-group-item-action"&gt;
+    &lt;div class="d-flex w-100 justify-content-between"&gt;
+      &lt;h5 class="mb-1"&gt;Outro título&lt;/h5&gt;
+      &lt;small class="text-muted"&gt;5 dias atrás&lt;/small&gt;
+    &lt;/div&gt;
+    &lt;p class="mb-1"&gt;Mais um pouco de texto aqui.&lt;/p&gt;
+  &lt;/a&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-horizontal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Grupo de Lista Horizontal</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Adicione .list-group-horizontal --&gt;
+&lt;ul class="list-group list-group-horizontal"&gt;
+  &lt;li class="list-group-item"&gt;Item 1&lt;/li&gt;
+  &lt;li class="list-group-item"&gt;Item 2&lt;/li&gt;
+  &lt;li class="list-group-item"&gt;Item 3&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- Responsivo: horizontal a partir de 'md' --&gt;
+&lt;ul class="list-group list-group-horizontal-md mt-3"&gt;
+  &lt;li class="list-group-item"&gt;Item 1&lt;/li&gt;
+  &lt;li class="list-group-item"&gt;Item 2&lt;/li&gt;
+  &lt;li class="list-group-item"&gt;Item 3&lt;/li&gt;
+&lt;/ul&gt;</code></pre></div></div></div></div>
+    
+    <template id="slide-1">
+        <div class="slide justify-content-center">
+            <div class="slide-content text-center">
+                <div class="mb-4" style="animation: float 3s ease-in-out infinite;">
+                    <i class="bi bi-list-ul" style="font-size: 8rem; color: #7952b3; text-shadow: 0 0 30px rgba(121, 82, 179, 0.5);"></i>
+                </div>
+                <h1 class="mb-3 display-1 fw-bolder animatable fade-in-up" style="color: #563d7c; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Grupos de Lista</h1>
+                <p class="mb-4 display-5 fw-light animatable fade-in-up delay-1" style="color: #6f42c1;">(List Groups)</p>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-2">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-list-ul me-3"></i>O que são Grupos de Lista?</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">São componentes flexíveis para exibir uma série de itens ou listas.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-bullseye me-2"></i>Propósito</h4>
+                        <p class="concept-text">Perfeitos para criar menus de navegação simples, listas de arquivos, caixas de entrada ou qualquer lista de itens.</p>
+                        <hr class="my-5">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-code-braces me-2"></i>Classes Fundamentais</h4>
+                        <p class="concept-text">Container: <code class="bg-light p-2 rounded">.list-group</code> (aplicado a um <code>&lt;ul&gt;</code> ou <code>&lt;div&gt;</code>)</p>
+                        <p class="concept-text mt-3">Itens: <code class="bg-light p-2 rounded">.list-group-item</code> (aplicado a um <code>&lt;li&gt;</code> ou <code>&lt;a&gt;</code>)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-3">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 1: Básico e Estados</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">Use <code>.active</code> para destacar um item e <code>.disabled</code> para desativá-lo.</p>
+                    <div class="p-4 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-basic"></i>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-group">
+                                  <li class="list-group-item active" aria-current="true">Um item ativo</li>
+                                  <li class="list-group-item">Um segundo item</li>
+                                  <li class="list-group-item">Um terceiro item</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 mt-4 mt-md-0">
+                                <ul class="list-group">
+                                  <li class="list-group-item disabled" aria-disabled="true">Um item desativado</li>
+                                  <li class="list-group-item">Um segundo item</li>
+                                  <li class="list-group-item">Um terceiro item</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-4">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 2: Links e Botões</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">Use <code>&lt;a&gt;</code> ou <code>&lt;button&gt;</code> e adicione <code>.list-group-item-action</code> para habilitar o efeito hover.</p>
+                    <div class="p-4 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-actions"></i>
+                        <div class="list-group">
+                          <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+                            Link ativo
+                          </a>
+                          <a href="#" class="list-group-item list-group-item-action">Segundo link</a>
+                          <button type="button" class="list-group-item list-group-item-action">
+                            Um item de botão
+                          </button>
+                          <a href="#" class="list-group-item list-group-item-action disabled">Link desativado</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-5">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 3: Com Badges e Cores</h2></div>
+            <div class="slide-body">
+                <div class="container">
+                    <div class="row gy-5">
+                        <div class="col-lg-6 animatable delay-1">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Com Badges</h3>
+                            <div class="p-4 rounded-4 component-demo">
+                                <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-badges-colors"></i>
+                                <ul class="list-group">
+                                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Caixa de Entrada
+                                    <span class="badge bg-primary rounded-pill">14</span>
+                                  </li>
+                                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Spam
+                                    <span class="badge bg-danger rounded-pill">2</span>
+                                  </li>
+                                  <li class="list-group-item">Itens enviados</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 animatable delay-2">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Cores Contextuais</h3>
+                            <div class="p-4 rounded-4 component-demo">
+                                <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-badges-colors"></i>
+                                <ul class="list-group">
+                                  <li class="list-group-item list-group-item-success">Item Success</li>
+                                  <li class="list-group-item list-group-item-warning">Item Warning</li>
+                                  <li class="list-group-item list-group-item-danger">Item Danger</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-6">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 4: Conteúdo Customizado</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">Use utilitários de Flexbox para criar layouts complexos dentro de um item.</p>
+                    <div class="p-4 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-custom"></i>
+                        <div class="list-group">
+                          <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+                            <div class="d-flex w-100 justify-content-between">
+                              <h5 class="mb-1">Título da lista</h5>
+                              <small>3 dias atrás</small>
+                            </div>
+                            <p class="mb-1">Algum conteúdo de placeholder em um parágrafo.</p>
+                            <small>E um texto menor para rodapé.</small>
+                          </a>
+                          <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                              <h5 class="mb-1">Outro título</h5>
+                              <small class="text-muted">5 dias atrás</small>
+                            </div>
+                            <p class="mb-1">Mais um pouco de texto aqui.</p>
+                          </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-7">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 5: Lista Horizontal</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">Use <code>.list-group-horizontal</code> para exibir itens lado a lado.</p>
+                    <div class="p-4 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-horizontal"></i>
+                        <ul class="list-group list-group-horizontal">
+                          <li class="list-group-item">Item 1</li>
+                          <li class="list-group-item">Item 2</li>
+                          <li class="list-group-item">Item 3</li>
+                        </ul>
+                        <p class="text-center fs-5 mt-4 mb-3">Pode ser responsivo, ex: <code>.list-group-horizontal-md</code></p>
+                        <ul class="list-group list-group-horizontal-md">
+                          <li class="list-group-item">Item 1</li>
+                          <li class="list-group-item">Item 2</li>
+                          <li class="list-group-item">Item 3</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-8">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable">Boas Práticas</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-cursor-fill fs-1 text-primary"></i>
+                                <h4 class="fw-bold my-3">Ação vs. Informação</h4>
+                                <p class="text-muted">Use <code>&lt;a&gt;</code> ou <code>&lt;button&gt;</code> se o item for clicável. Use <code>&lt;li&gt;</code> se for apenas para exibir informação.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-universal-access fs-1 text-info"></i>
+                                <h4 class="fw-bold my-3">Acessibilidade</h4>
+                                <p class="text-muted">Se usar links, use <code>.active</code> com <code>aria-current="true"</code>. Se usar botões, use <code>aria-disabled="true"</code>.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-justify-left fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">Mantenha Simples</h4>
+                                <p class="text-muted">Embora o conteúdo customizado seja poderoso, evite sobrecarregar os itens. Listas devem ser fáceis de escanear.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-9">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Resumo: Grupos de Lista</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-primary-subtle border-primary-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-primary-emphasis">Base</h3>
+                                <p><code>.list-group</code> no container e <code>.list-group-item</code> nos filhos.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-success-subtle border-success-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-success-emphasis">Ações</h3>
+                                <p>Use <code>&lt;a&gt;</code> ou <code>&lt;button&gt;</code> com <code>.list-group-item-action</code> para links.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-info-subtle border-info-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-info-emphasis">Conteúdo</h3>
+                                <p>Use <code>.d-flex</code> e <code>.justify-content-between</code> para adicionar badges ou texto.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        const slideContainer = document.getElementById('slide-container');
+        // Lista de IDs dos templates
+        const slideTemplates = [
+            'slide-1', 'slide-2', 'slide-3', 'slide-4', 'slide-5', 'slide-6',
+            'slide-7', 'slide-8', 'slide-9'
+        ];
+        const totalSlides = slideTemplates.length;
+        let currentSlideIndex = 0;
+
+        const progressBar = document.getElementById('progressBar');
+        const counter = document.getElementById('currentSlide');
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        function updateProgress(index) {
+            const progress = ((index + 1) / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+        }
+        
+        function animateSlide(slideElement) {
+            const elementsToAnimate = slideElement.querySelectorAll('.animatable');
+            elementsToAnimate.forEach(el => {
+                el.classList.add('fade-in-up');
+            });
+        }
+        
+        function showSlide(index) {
+            const templateId = slideTemplates[index];
+            const template = document.getElementById(templateId);
+            
+            // Limpa o palco e injeta o novo slide
+            slideContainer.innerHTML = template.innerHTML;
+
+            const activeSlideElement = slideContainer.firstElementChild;
+            
+            // Ativa animações
+            animateSlide(activeSlideElement);
+            
+            // Inicializa quaisquer componentes JS (Carrossel, etc.)
+            // que possam estar no slide recém-injetado
+            const carouselsInActiveSlide = activeSlideElement.querySelectorAll('.carousel');
+            carouselsInActiveSlide.forEach(carouselEl => {
+                const carouselInstance = bootstrap.Carousel.getOrCreateInstance(carouselEl);
+                if (carouselEl.dataset.bsRide === 'carousel') {
+                    carouselInstance.cycle();
+                }
+            });
+            
+            // Atualiza o contador e a barra
+            counter.textContent = index + 1;
+            updateProgress(index);
+        }
+        
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        function previousSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'ArrowRight' || event.key === ' ') {
+                    event.preventDefault();
+                    nextSlide();
+                } else if (event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    previousSlide();
+                }
+            });
+
+            // Mostra o primeiro slide
+            showSlide(0);
+        });
+    </script>
+</body>
+</html>

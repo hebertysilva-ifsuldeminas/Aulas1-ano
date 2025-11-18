@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Bootstrap - Tabelas</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Impede qualquer scroll */
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, rgba(121, 82, 179, 0.2) 0%, rgba(121, 82, 179, 0) 60%), #ffffff;
+        }
+
+        /* O "Palco" onde os slides são injetados */
+        #slide-container {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 100;
+        }
+        
+        /* A estrutura interna de CADA slide */
+        .slide {
+            height: 100vh;
+            width: 100vw;
+            padding: 3rem 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            animation: fadeIn 0.5s ease-in-out; /* Animação suave de entrada */
+        }
+
+        .slide-header {
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .slide-body {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            color: #343a40;
+        }
+        
+        .component-demo {
+            background-color: #ffffff;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            position: relative;
+        }
+        
+        .component-demo:hover {
+            border-color: #6f42c1;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .click-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: #adb5bd;
+            transition: all 0.3s ease;
+            z-index: 300;
+            cursor: pointer;
+        }
+
+        .component-demo:hover .click-icon {
+            color: #6f42c1;
+            transform: scale(1.2);
+        }
+
+        .concept-box, .info-card {
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+
+        .concept-box {
+            border-top: 5px solid #6f42c1;
+        }
+        
+        /* Controles Ficam Fora do 'palco' */
+        .slide-counter, .nav-button, .progress-bar-container {
+            position: fixed;
+            z-index: 1030; 
+        }
+
+        .slide-counter {
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar-container {
+            top: 0; left: 0;
+            height: 4px; width: 100%;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #3b82f6);
+            transition: width 0.3s ease;
+        }
+        
+        .modal-body pre { border-radius: 0.5rem; }
+
+        .concept-text {
+            font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+            line-height: 1.6;
+        }
+        .concept-text code {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            padding: 0.3em 0.6em !important;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animatable {
+            opacity: 0;
+            animation: fadeInUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+
+    <main id="slide-container"></main>
+
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="slide-counter"><i class="bi bi-display me-2"></i><span id="currentSlide">1</span> / <span id="totalSlides"></span></div>
+    <div class="position-fixed top-50 start-0 translate-middle-y z-3 ms-4"><button onclick="previousSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-left fs-5 lh-1"></i></button></div>
+    <div class="position-fixed top-50 end-0 translate-middle-y z-3 me-4"><button onclick="nextSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-right fs-5 lh-1"></i></button></div>
+
+    <div class="modal fade" id="modal-code-basic" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Tabela Básica (Striped e Hover)</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- 
+  .table: Classe base
+  .table-striped: Linhas "zebradas"
+  .table-hover: Efeito ao passar o mouse
+--&gt;
+&lt;table class="table table-striped table-hover"&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th scope="col"&gt;#&lt;/th&gt;
+      &lt;th scope="col"&gt;Nome&lt;/th&gt;
+      &lt;th scope="col"&gt;Sobrenome&lt;/th&gt;
+      &lt;th scope="col"&gt;Usuário&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th scope="row"&gt;1&lt;/th&gt;
+      &lt;td&gt;Mark&lt;/td&gt;
+      &lt;td&gt;Otto&lt;/td&gt;
+      &lt;td&gt;@mdo&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th scope="row"&gt;2&lt;/th&gt;
+      &lt;td&gt;Jacob&lt;/td&gt;
+      &lt;td&gt;Thornton&lt;/td&gt;
+      &lt;td&gt;@fat&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-borders" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Bordas, Compacta e Sem Bordas</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Tabela com Bordas --&gt;
+&lt;table class="table table-bordered"&gt;
+  ...
+&lt;/table&gt;
+
+&lt;!-- Tabela Compacta (menos padding) --&gt;
+&lt;table class="table table-sm"&gt;
+  ...
+&lt;/table&gt;
+
+&lt;!-- Tabela Sem Bordas --&gt;
+&lt;table class="table table-borderless"&gt;
+  ...
+&lt;/table&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-colors" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Cores e Tema Escuro</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Tema Escuro --&gt;
+&lt;table class="table table-dark table-striped"&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th scope="col"&gt;#&lt;/th&gt;
+      &lt;th scope="col"&gt;Produto&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th scope="row"&gt;1&lt;/th&gt;
+      &lt;td&gt;Monitor LED&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;!-- Cores Contextuais nas Linhas --&gt;
+&lt;table class="table"&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th scope="col"&gt;Status&lt;/th&gt;
+      &lt;th scope="col"&gt;Pedido&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr class="table-success"&gt;
+      &lt;th scope="row"&gt;Sucesso&lt;/th&gt;
+      &lt;td&gt;Pedido #12345&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr class="table-danger"&gt;
+      &lt;th scope="row"&gt;Falha&lt;/th&gt;
+      &lt;td&gt;Pedido #12346&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th scope="row"&gt;Padrão&lt;/th&gt;
+      &lt;td&gt;Pedido #12347&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-responsive" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Tabela Responsiva</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- 
+  Para fazer uma tabela ser responsiva, envolva-a 
+  em uma &lt;div&gt; com a classe .table-responsive.
+  Isso adicionará uma barra de rolagem horizontal
+  APENAS quando a tabela não couber na tela.
+--&gt;
+&lt;div class="table-responsive"&gt;
+  &lt;table class="table"&gt;
+    &lt;thead&gt;
+      &lt;tr&gt;
+        &lt;th scope="col"&gt;#&lt;/th&gt;
+        &lt;th scope="col"&gt;Nome&lt;/th&gt;
+        &lt;th scope="col"&gt;E-mail&lt;/th&gt;
+        &lt;th scope="col"&gt;Telefone&lt;/th&gt;
+        &lt;th scope="col"&gt;Endereço&lt;/th&gt;
+        &lt;th scope="col"&gt;Cidade&lt;/th&gt;
+        &lt;th scope="col"&gt;Estado&lt;/th&gt;
+      &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;th scope="row"&gt;1&lt;/th&gt;
+        &lt;td&gt;Maria Silva&lt;/td&gt;
+        &lt;td&gt;maria.silva@email.com&lt;/td&gt;
+        &lt;td&gt;(11) 98765-4321&lt;/td&gt;
+        &lt;td&gt;Rua das Flores, 123&lt;/td&gt;
+        &lt;td&gt;São Paulo&lt;/td&gt;
+        &lt;td&gt;SP&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+
+    <template id="slide-1">
+        <div class="slide justify-content-center">
+            <div class="slide-content text-center">
+                <div class="mb-4" style="animation: float 3s ease-in-out infinite;">
+                    <i class="bi bi-table" style="font-size: 8rem; color: #7952b3; text-shadow: 0 0 30px rgba(121, 82, 179, 0.5);"></i>
+                </div>
+                <h1 class="mb-3 display-1 fw-bolder animatable fade-in-up" style="color: #563d7c; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Dominando Tabelas</h1>
+                <p class="mb-4 display-5 fw-light animatable fade-in-up delay-1" style="color: #6f42c1;">O Guia Completo com Bootstrap 5</p>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-2">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-table me-3"></i>O que são Tabelas?</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">Componentes para exibir dados em linhas e colunas.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-bullseye me-2"></i>Propósito</h4>
+                        <p class="concept-text">Perfeitas para exibir dados tabulares, como listas de usuários, relatórios financeiros, notas ou qualquer conjunto de dados estruturados.</p>
+                        <hr class="my-5">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-code-braces me-2"></i>Classe Fundamental</h4>
+                        <p class="concept-text">A classe principal é <code class="bg-light p-2 rounded">.table</code>. Ela remove o estilo padrão do navegador e aplica o visual do Bootstrap.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-3">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 1: Zebrada (Striped) e Hover</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">Use <code>.table-striped</code> para linhas alternadas e <code>.table-hover</code> para efeito ao passar o mouse.</p>
+                    <div class="p-4 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-basic"></i>
+                        <table class="table table-striped table-hover">
+                          <thead>
+                            <tr>
+                              <th scope="col">#</th>
+                              <th scope="col">Nome</th>
+                              <th scope="col">Sobrenome</th>
+                              <th scope="col">Usuário</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <th scope="row">1</th>
+                              <td>Mark</td>
+                              <td>Otto</td>
+                              <td>@mdo</td>
+                            </tr>
+                            <tr>
+                              <th scope="row">2</th>
+                              <td>Jacob</td>
+                              <td>Thornton</td>
+                              <td>@fat</td>
+                            </tr>
+                            <tr>
+                              <th scope="row">3</th>
+                              <td>Larry</td>
+                              <td>the Bird</td>
+                              <td>@twitter</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-4">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 2: Bordas e Estilos</h2></div>
+            <div class="slide-body">
+                <div class="container">
+                    <div class="row gy-5">
+                        <div class="col-lg-6 animatable delay-1">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Com Bordas (<code>.table-bordered</code>)</h3>
+                            <div class="p-4 rounded-4 component-demo">
+                                <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-borders"></i>
+                                <table class="table table-bordered">
+                                  <thead><tr><th scope="col">#</th><th scope="col">Item</th></tr></thead>
+                                  <tbody><tr><th scope="row">1</th><td>Item A</td></tr><tr><th scope="row">2</th><td>Item B</td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 animatable delay-2">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Compacta (<code>.table-sm</code>)</h3>
+                            <div class="p-4 rounded-4 component-demo">
+                                <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-borders"></i>
+                                <table class="table table-sm">
+                                  <thead><tr><th scope="col">#</th><th scope="col">Item</th></tr></thead>
+                                  <tbody><tr><th scope="row">1</th><td>Item A</td></tr><tr><th scope="row">2</th><td>Item B</td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-5">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-palette me-3"></i>Cores Contextuais</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">Use classes como <code>.table-primary</code>, <code>.table-success</code>, etc.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-code-braces me-2"></i>Como Aplicar</h4>
+                        <p class="concept-text">Você pode aplicar a classe de cor na tabela inteira (<code>&lt;table class="table table-success"&gt;</code>).</p>
+                        <hr class="my-4">
+                        <p class="concept-text">Ou aplicar apenas em uma linha (<code>&lt;tr class="table-danger"&gt;</code>).</p>
+                        <hr class="my-4">
+                        <p class="concept-text">Ou apenas em uma célula (<code>&lt;td class="table-warning"&gt;</code>).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-6">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 3: Cores e Tema Escuro</h2></div>
+            <div class="slide-body">
+                <div class="container">
+                    <div class="row gy-5">
+                        <div class="col-lg-6 animatable delay-1">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Tema Escuro (<code>.table-dark</code>)</h3>
+                            <div class="p-4 rounded-4 component-demo">
+                                <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-colors"></i>
+                                <table class="table table-dark table-striped">
+                                  <thead><tr><th scope="col">#</th><th scope="col">Produto</th></tr></thead>
+                                  <tbody><tr><th scope="row">1</th><td>Monitor LED</td></tr><tr><th scope="row">2</th><td>Teclado</td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 animatable delay-2">
+                            <h3 class="fw-semibold mb-4 text-dark text-center">Linhas Coloridas</h3>
+                            <div class="p-4 rounded-4 component-demo">
+                                <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-colors"></i>
+                                <table class="table">
+                                  <thead><tr><th scope="col">Status</th><th scope="col">Pedido</th></tr></thead>
+                                  <tbody>
+                                    <tr class="table-success">
+                                      <th scope="row">Sucesso</th>
+                                      <td>Pedido #12345</td>
+                                    </tr>
+                                    <tr class="table-danger">
+                                      <th scope="row">Falha</th>
+                                      <td>Pedido #12346</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-7">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-phone me-3"></i>O Problema: Responsividade</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">Tabelas largas são um pesadelo em telas pequenas, pois elas "vazam" e quebram o layout.</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box" style="border-color: #dc3545;">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-magic me-2"></i>A Solução</h4>
+                        <p class="concept-text">Envolva a sua <code>&lt;table&gt;</code> em uma <code>&lt;div&gt;</code> com a classe <code class="bg-light p-2 rounded">.table-responsive</code>.</p>
+                        <p class="concept-text mt-3">Isso adicionará uma barra de rolagem horizontal **apenas** quando a tabela não couber na tela, salvando seu layout.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-8">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Exemplo 4: Tabela Responsiva</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">(Diminua a janela do navegador para ver o efeito)</p>
+                    <div class="p-4 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-responsive"></i>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                              <thead>
+                                <tr>
+                                  <th scope="col">#</th>
+                                  <th scope="col">Nome</th>
+                                  <th scope="col">E-mail</th>
+                                  <th scope="col">Telefone</th>
+                                  <th scope="col">Endereço</th>
+                                  <th scope="col">Cidade</th>
+                                  <th scope="col">Estado</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <th scope="row">1</th>
+                                  <td>Maria Silva</td>
+                                  <td>maria.silva@email.com</td>
+                                  <td>(11) 98765-4321</td>
+                                  <td>Rua das Flores, 123</td>
+                                  <td>São Paulo</td>
+                                  <td>SP</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">2</th>
+                                  <td>João Pereira</td>
+                                  <td>joao.pereira@email.com</td>
+                                  <td>(21) 91234-5678</td>
+                                  <td>Av. Copacabana, 456</td>
+                                  <td>Rio de Janeiro</td>
+                                  <td>RJ</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-9">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable">Tabelas no Mundo Real</h2></div>
+            <div class="slide-body">
+                <div class="container">
+                    <p class="fs-3 fw-light text-secondary mb-5 text-center animatable">Onde as tabelas são mais usadas profissionalmente.</p>
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="card h-100 shadow-sm info-card">
+                              <svg class="card-img-top" height="200" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#0d6efd"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text" style="font-size: 1.5rem">Painel de Controle</text>
+                              </svg>
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">Dashboards (Painéis)</h5>
+                                    <p class="card-text">Para exibir listas de usuários, pedidos, produtos ou qualquer dado administrativo.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="card h-100 shadow-sm info-card">
+                              <svg class="card-img-top" height="200" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#198754"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text" style="font-size: 1.5rem">Tabela de Preços</text>
+                              </svg>
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">Planos de Preços</h5>
+                                    <p class="card-text">Comum para comparar características entre diferentes planos (ex: Básico, Pro, Enterprise).</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="card h-100 shadow-sm info-card">
+                              <svg class="card-img-top" height="200" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#6c757d"></rect>
+                                <text x="50%" y="50%" fill="#fff" dy=".3em" text-anchor="middle" class="svg-placeholder-text" style="font-size: 1.5rem">Relatórios Financeiros</text>
+                              </svg>
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">Relatórios e Dados</h5>
+                                    <p class="card-text">Qualquer exibição de dados financeiros, estatísticas ou relatórios analíticos.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-10">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Resumo: Tabelas</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-primary-subtle border-primary-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-primary-emphasis">Base</h3>
+                                <p><code>.table</code> é a classe principal para todo o estilo básico.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-success-subtle border-success-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-success-emphasis">Estilos</h3>
+                                <p><code>.table-striped</code>, <code>.table-hover</code> e <code>.table-bordered</code> são os mais comuns.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-danger-subtle border-danger-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-danger-emphasis">Responsividade</h3>
+                                <p><code>.table-responsive</code> é **essencial** para envolver sua tabela e salvar seu layout no mobile.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        const slideContainer = document.getElementById('slide-container');
+        // Lista de IDs dos templates
+        const slideTemplates = [
+            'slide-1', 'slide-2', 'slide-3', 'slide-4', 'slide-5', 'slide-6',
+            'slide-7', 'slide-8', 'slide-9', 'slide-10'
+        ];
+        const totalSlides = slideTemplates.length;
+        let currentSlideIndex = 0;
+
+        const progressBar = document.getElementById('progressBar');
+        const counter = document.getElementById('currentSlide');
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        // --- FUNÇÕES GLOBAIS DE NAVEGAÇÃO ---
+        function updateProgress(index) {
+            const progress = ((index + 1) / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+        }
+        
+        function animateSlide(slideElement) {
+            const elementsToAnimate = slideElement.querySelectorAll('.animatable');
+            elementsToAnimate.forEach(el => {
+                // Força o reinício da animação
+                el.style.animation = 'none';
+                el.offsetHeight; // Força reflow
+                el.style.animation = null; 
+                el.classList.add('fade-in-up');
+            });
+        }
+        
+        function showSlide(index) {
+            const templateId = slideTemplates[index];
+            const template = document.getElementById(templateId);
+            
+            slideContainer.innerHTML = template.innerHTML;
+
+            const activeSlideElement = slideContainer.firstElementChild;
+            
+            animateSlide(activeSlideElement);
+            
+            // Inicializa quaisquer componentes JS (Carrossel, etc.)
+            const carouselsInActiveSlide = activeSlideElement.querySelectorAll('.carousel');
+            carouselsInActiveSlide.forEach(carouselEl => {
+                const carouselInstance = bootstrap.Carousel.getOrCreateInstance(carouselEl);
+                if (carouselEl.dataset.bsRide === 'carousel') {
+                    carouselInstance.cycle();
+                }
+            });
+            
+            counter.textContent = index + 1;
+            updateProgress(index);
+        }
+        
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        function previousSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+
+        // --- INICIALIZAÇÃO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Teclado
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'ArrowRight' || event.key === ' ') {
+                    event.preventDefault();
+                    nextSlide();
+                } else if (event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    previousSlide();
+                }
+            });
+
+            // Mostra o primeiro slide
+            showSlide(0);
+        });
+    </script>
+</body>
+</html>
