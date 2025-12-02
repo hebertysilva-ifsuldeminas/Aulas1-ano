@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Bootstrap - Dark Mode Avançado</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, rgba(121, 82, 179, 0.2) 0%, rgba(121, 82, 179, 0) 60%), #ffffff;
+        }
+
+        #slide-container {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .slide {
+            height: 100vh;
+            width: 100vw;
+            padding: 3rem 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .slide-header { width: 100%; flex-shrink: 0; }
+        
+        .slide-body {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            color: #343a40;
+        }
+        
+        .component-demo {
+            background-color: #ffffff;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            position: relative;
+            overflow: hidden; 
+        }
+        
+        .component-demo:hover {
+            border-color: #6f42c1;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .click-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: #adb5bd;
+            transition: all 0.3s ease;
+            z-index: 300;
+            cursor: pointer;
+        }
+
+        .component-demo:hover .click-icon {
+            color: #6f42c1;
+            transform: scale(1.2);
+        }
+
+        .concept-box, .info-card {
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+
+        .concept-box { border-top: 5px solid #6f42c1; }
+        
+        .slide-counter, .nav-button, .progress-bar-container {
+            position: fixed;
+            z-index: 1030; 
+        }
+
+        .slide-counter {
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar-container {
+            top: 0; left: 0;
+            height: 4px; width: 100%;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #3b82f6);
+            transition: width 0.3s ease;
+        }
+        
+        .modal-body pre { 
+            border-radius: 0.5rem; 
+            background-color: #272822 !important; 
+            color: #f8f8f2 !important;
+            padding: 15px;
+            margin: 0;
+        }
+        
+        .modal-body pre code {
+            background-color: transparent !important;
+            color: inherit !important;
+            text-shadow: none !important;
+        }
+
+        .concept-text {
+            font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+            line-height: 1.6;
+        }
+        .concept-text code {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            padding: 0.3em 0.6em !important;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .animatable {
+            opacity: 0;
+            animation: fadeInUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+        .delay-4 { animation-delay: 0.8s; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. O PALCO PRINCIPAL -->
+    <main id="slide-container"></main>
+
+    <!-- 2. OS CONTROLES -->
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="slide-counter"><i class="bi bi-display me-2"></i><span id="currentSlide">1</span> / <span id="totalSlides"></span></div>
+    <div class="position-fixed top-50 start-0 translate-middle-y z-3 ms-4"><button onclick="previousSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-left fs-5 lh-1"></i></button></div>
+    <div class="position-fixed top-50 end-0 translate-middle-y z-3 me-4"><button onclick="nextSlide()" class="nav-button btn btn-light rounded-circle shadow-lg p-3"><i class="bi bi-chevron-right fs-5 lh-1"></i></button></div>
+
+    <!-- 3. OS MODAIS DE CÓDIGO -->
+    
+    <div class="modal fade" id="modal-code-vars" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Variáveis CSS</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-css">/* Como o Bootstrap faz a mágica: */
+/* Quando data-bs-theme="dark" */
+
+:root, [data-bs-theme="light"] {
+  --bs-body-color: #212529;
+  --bs-body-bg: #fff;
+}
+
+[data-bs-theme="dark"] {
+  --bs-body-color: #dee2e6; /* Texto claro */
+  --bs-body-bg: #212529;    /* Fundo escuro */
+  --bs-primary: #0d6efd;    /* Cores podem ser redefinidas aqui */
+}</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-forms" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Formulários no Dark Mode</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;div class="p-4 border rounded" data-bs-theme="dark"&gt;
+  &lt;h3&gt;Login&lt;/h3&gt;
+  &lt;div class="mb-3"&gt;
+    &lt;label class="form-label"&gt;Email&lt;/label&gt;
+    &lt;!-- O .form-control detecta o tema e muda cor, borda e foco --&gt;
+    &lt;input type="email" class="form-control" placeholder="nome@exemplo.com"&gt;
+  &lt;/div&gt;
+  &lt;div class="mb-3 form-check"&gt;
+    &lt;input type="checkbox" class="form-check-input" id="check1"&gt;
+    &lt;label class="form-check-label" for="check1"&gt;Lembrar de mim&lt;/label&gt;
+  &lt;/div&gt;
+  &lt;button class="btn btn-primary"&gt;Entrar&lt;/button&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-navbar" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Navbar Adaptável</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;!-- Navbar que respeita o tema do pai ou global --&gt;
+&lt;!-- Note que não usamos navbar-dark ou navbar-light aqui --&gt;
+&lt;nav class="navbar navbar-expand-lg bg-body-tertiary"&gt;
+  &lt;div class="container-fluid"&gt;
+    &lt;a class="navbar-brand" href="#"&gt;Minha Marca&lt;/a&gt;
+    &lt;button class="navbar-toggler" type="button"&gt;
+      &lt;span class="navbar-toggler-icon"&gt;&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;div class="collapse navbar-collapse"&gt;
+       &lt;!-- Links... --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-custom" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Customizando o Tema</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-html">&lt;style&gt;
+  /* Criando um tema "azul escuro" personalizado */
+  [data-bs-theme="blue-dark"] {
+    --bs-body-color: #e0e0e0;
+    --bs-body-bg: #0b1d35; /* Azul profundo */
+    --bs-primary: #3d8bfd;
+    --bs-border-color: #1f3b63;
+  }
+&lt;/style&gt;
+
+&lt;div class="p-4 border" data-bs-theme="blue-dark"&gt;
+  &lt;h3&gt;Tema Azul Profundo&lt;/h3&gt;
+  &lt;p&gt;Customizado via variáveis CSS.&lt;/p&gt;
+  &lt;button class="btn btn-primary"&gt;Botão&lt;/button&gt;
+&lt;/div&gt;</code></pre></div></div></div></div>
+
+    <div class="modal fade" id="modal-code-toggle-advanced" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Código: Toggle Profissional</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><pre><code class="language-javascript">// Lógica completa para alternar tema
+const switchTheme = () => {
+  // 1. Pega o elemento HTML
+  const html = document.documentElement;
+  
+  // 2. Verifica o estado atual
+  const currentTheme = html.getAttribute('data-bs-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  
+  // 3. Aplica o novo tema
+  html.setAttribute('data-bs-theme', newTheme);
+  
+  // 4. Salva a preferência no LocalStorage (persiste após refresh)
+  localStorage.setItem('theme', newTheme);
+};
+
+// Ao carregar a página:
+const savedTheme = localStorage.getItem('theme');
+const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+if (savedTheme) {
+  document.documentElement.setAttribute('data-bs-theme', savedTheme);
+} else if (systemPrefersDark) {
+  document.documentElement.setAttribute('data-bs-theme', 'dark');
+}</code></pre></div></div></div></div>
+
+    <!-- 4. OS TEMPLATES DOS SLIDES -->
+
+    <template id="slide-1">
+        <div class="slide justify-content-center">
+            <div class="slide-content text-center">
+                <div class="mb-4" style="animation: float 3s ease-in-out infinite;">
+                    <i class="bi bi-moon-stars-fill" style="font-size: 8rem; color: #7952b3; text-shadow: 0 0 30px rgba(121, 82, 179, 0.5);"></i>
+                </div>
+                <h1 class="mb-3 display-1 fw-bolder animatable fade-in-up" style="color: #563d7c; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Dominando o Dark Mode</h1>
+                <p class="mb-4 display-5 fw-light animatable fade-in-up delay-1" style="color: #6f42c1;">Avançado: Variáveis, Componentes e JS</p>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-2">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable"><i class="bi bi-cpu me-3"></i>Como Funciona?</h2></div>
+            <div class="slide-body">
+                <div class="container text-center animatable">
+                    <p class="fs-3 fw-light text-secondary mb-5">Não é mágica, são Variáveis CSS (CSS Custom Properties).</p>
+                    <div class="p-5 rounded-4 shadow-sm concept-box">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-filetype-css me-2"></i>O Segredo</h4>
+                        <p class="concept-text">O Bootstrap redefiniu todas as suas cores fixas (ex: <code>#fff</code>, <code>#000</code>) para variáveis (ex: <code>--bs-body-bg</code>).</p>
+                        <hr class="my-5">
+                        <h4 class="fw-bold mb-4 concept-text"><i class="bi bi-arrow-repeat me-2"></i>A Troca</h4>
+                        <p class="concept-text">Ao mudar o atributo <code>data-bs-theme="dark"</code>, o Bootstrap carrega um novo conjunto de valores para essas variáveis. O botão "primary" continua "primary", mas seu tom é ajustado para contraste.</p>
+                        <div class="mt-4">
+                             <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-code-vars"><i class="bi bi-code-slash me-2"></i>Ver Código CSS</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-3">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Componentes Complexos</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">Veja como componentes ricos (Navbar e Cards) se comportam.</p>
+                    <div class="p-5 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-navbar"></i>
+                        <div class="p-3 border rounded mb-3" data-bs-theme="dark">
+                            <p class="text-muted mb-2 small text-uppercase fw-bold">Modo Escuro Ativo</p>
+                            <nav class="navbar navbar-expand-lg bg-body-tertiary rounded mb-3">
+                              <div class="container-fluid">
+                                <a class="navbar-brand" href="#">App</a>
+                                <button class="btn btn-outline-success btn-sm">Login</button>
+                              </div>
+                            </nav>
+                            <div class="card">
+                                <div class="card-header">Destaque</div>
+                                <div class="card-body">
+                                    <h5 class="card-title">Card Adaptativo</h5>
+                                    <p class="card-text">O fundo do card muda de branco para cinza escuro automaticamente.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-4">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Formulários no Escuro</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">Inputs, checks e validações são automaticamente invertidos.</p>
+                    <div class="p-5 rounded-4 component-demo">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-forms"></i>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="p-4 border rounded h-100" data-bs-theme="light">
+                                    <span class="badge bg-secondary mb-3">Light Mode</span>
+                                    <input type="text" class="form-control mb-3" placeholder="Input Claro">
+                                    <select class="form-select"><option>Opção 1</option></select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-4 border rounded h-100" data-bs-theme="dark">
+                                    <span class="badge bg-primary mb-3">Dark Mode</span>
+                                    <input type="text" class="form-control mb-3" placeholder="Input Escuro">
+                                    <select class="form-select"><option>Opção 1</option></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-5">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Customização (Além do Dark)</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">Você não está preso ao cinza! Crie temas customizados (ex: Azul Profundo).</p>
+                    <div class="p-5 rounded-4 component-demo text-center">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-custom"></i>
+                        
+                        <!-- Simulando um tema customizado com estilos inline para o demo -->
+                        <div class="p-5 rounded-3 border" style="background-color: #0b1d35; color: #e0e0e0; border-color: #1f3b63 !important;">
+                            <h3 style="color: #fff;">Tema "Blue Night"</h3>
+                            <p>Ao sobrescrever as variáveis <code>--bs-body-bg</code> e <code>--bs-body-color</code>, você cria identidades visuais únicas.</p>
+                            <button class="btn btn-primary mt-3">Ação no Tema</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-6">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">JavaScript: O Toggle Real</h2></div>
+            <div class="slide-body">
+                <div class="container animatable">
+                    <p class="text-center fs-4 mb-4">Como criar um botão que alterna o tema e salva a preferência.</p>
+                    <div class="p-5 rounded-4 component-demo text-center">
+                        <i class="bi bi-code-slash click-icon" data-bs-toggle="modal" data-bs-target="#modal-code-toggle-advanced"></i>
+                        
+                        <div id="demo-toggle-area-advanced" class="p-5 rounded-3 border mb-4 transition-all" data-bs-theme="light" style="transition: background-color 0.3s, color 0.3s;">
+                            <h1 class="display-4"><i id="icon-display" class="bi bi-sun-fill text-warning"></i></h1>
+                            <h3>Estado Atual: <span id="tema-label-adv" class="fw-bold">Light</span></h3>
+                            <p>Este exemplo simula a persistência no <code>localStorage</code>.</p>
+                        </div>
+
+                        <button id="btn-toggle-theme-adv" class="btn btn-lg btn-dark rounded-pill px-4">
+                            <i class="bi bi-moon-stars me-2"></i> Ativar Dark Mode
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="slide-7">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title animatable">Desafios de Design</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-image fs-1 text-primary"></i>
+                                <h4 class="fw-bold my-3">Imagens</h4>
+                                <p class="text-muted">Imagens muito brilhantes podem ofuscar no modo escuro. Considere reduzir a opacidade ou usar filtros CSS (<code>filter: brightness(0.8)</code>).</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-layers fs-1 text-success"></i>
+                                <h4 class="fw-bold my-3">Sombras vs Bordas</h4>
+                                <p class="text-muted">Sombras são quase invisíveis em fundos escuros. O Bootstrap automaticamente troca sombras sutis por bordas claras para manter a hierarquia.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="p-4 rounded-4 bg-white shadow-sm h-100 info-card">
+                                <i class="bi bi-type fs-1 text-danger"></i>
+                                <h4 class="fw-bold my-3">Tipografia</h4>
+                                <p class="text-muted">Evite branco puro (<code>#fff</code>) em fundo preto puro (<code>#000</code>). O alto contraste causa fadiga ocular. Use os cinzas do Bootstrap.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="slide-8">
+        <div class="slide">
+            <div class="slide-header"><h2 class="slide-title text-center animatable">Resumo</h2></div>
+            <div class="slide-body">
+                <div class="container text-center">
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-lg-4 animatable delay-1">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-primary-subtle border-primary-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-primary-emphasis">Data Attribute</h3>
+                                <p>Tudo gira em torno de <code>data-bs-theme</code>. Use-o no <code>&lt;html&gt;</code> para sites ou em <code>&lt;div&gt;</code> para seções.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-2">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-success-subtle border-success-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-success-emphasis">CSS Vars</h3>
+                                <p>O Bootstrap usa variáveis. Para customizar, mude o valor da variável, não a classe CSS hardcoded.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animatable delay-3">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 p-4 bg-info-subtle border-info-subtle info-card">
+                                <h3 class="fw-bold mb-3 text-info-emphasis">JavaScript</h3>
+                                <p>Use JS para detectar a preferência do sistema (<code>matchMedia</code>) e salvar a escolha do usuário.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        const slideContainer = document.getElementById('slide-container');
+        // Lista de IDs dos templates ATUALIZADA
+        const slideTemplates = [
+            'slide-1', 'slide-2', 'slide-3', 'slide-4', 'slide-5', 'slide-6', 'slide-7', 'slide-8'
+        ];
+        const totalSlides = slideTemplates.length;
+        let currentSlideIndex = 0;
+
+        const progressBar = document.getElementById('progressBar');
+        const counter = document.getElementById('currentSlide');
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        function updateProgress(index) {
+            const progress = ((index + 1) / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+        }
+        
+        function animateSlide(slideElement) {
+            const elementsToAnimate = slideElement.querySelectorAll('.animatable');
+            elementsToAnimate.forEach(el => {
+                el.classList.add('fade-in-up');
+            });
+        }
+        
+        function showSlide(index) {
+            const templateId = slideTemplates[index];
+            const template = document.getElementById(templateId);
+            
+            slideContainer.innerHTML = template.innerHTML;
+            const activeSlideElement = slideContainer.firstElementChild;
+            animateSlide(activeSlideElement);
+
+            // Lógica específica para o Slide 6 (Toggle Demo Avançado)
+            if (templateId === 'slide-6') {
+                initAdvancedToggleDemo();
+            }
+            
+            counter.textContent = index + 1;
+            updateProgress(index);
+        }
+
+        // Função para o demo avançado
+        function initAdvancedToggleDemo() {
+            const btn = document.getElementById('btn-toggle-theme-adv');
+            const area = document.getElementById('demo-toggle-area-advanced');
+            const label = document.getElementById('tema-label-adv');
+            const icon = document.getElementById('icon-display');
+
+            if(btn && area) {
+                btn.addEventListener('click', () => {
+                    const currentTheme = area.getAttribute('data-bs-theme');
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    area.setAttribute('data-bs-theme', newTheme);
+                    
+                    if (newTheme === 'dark') {
+                        label.textContent = 'Dark';
+                        icon.className = 'bi bi-moon-stars-fill text-primary';
+                        btn.className = 'btn btn-lg btn-light rounded-pill px-4';
+                        btn.innerHTML = '<i class="bi bi-sun-fill me-2"></i> Ativar Light Mode';
+                    } else {
+                        label.textContent = 'Light';
+                        icon.className = 'bi bi-sun-fill text-warning';
+                        btn.className = 'btn btn-lg btn-dark rounded-pill px-4';
+                        btn.innerHTML = '<i class="bi bi-moon-stars me-2"></i> Ativar Dark Mode';
+                    }
+                });
+            }
+        }
+        
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+        
+        function previousSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlideIndex);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'ArrowRight' || event.key === ' ') {
+                    event.preventDefault();
+                    nextSlide();
+                } else if (event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    previousSlide();
+                }
+            });
+            showSlide(0);
+        });
+    </script>
+</body>
+</html>
